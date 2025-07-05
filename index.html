@@ -43,14 +43,15 @@
             box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
             z-index: 1000;
             text-align: center;
+            transition: background-color 0.3s;
         }
         
-        .top-copy-button:active {
+        .top-copy-button:active:not(:disabled) {
             background: #1976D2;
         }
         
         .top-copy-button:disabled {
-            background: #ccc;
+            background: #cccccc;
             cursor: not-allowed;
         }
 
@@ -192,12 +193,14 @@
             border-collapse: collapse;
             margin: 15px 0;
             font-size: 14px;
+            table-layout: fixed; /* 确保表格宽度固定 */
         }
         
         .data-table th, .data-table td {
             border: 1px solid #ddd;
             padding: 8px;
             text-align: left;
+            word-break: break-all; /* 确保长文本换行 */
         }
         
         .data-table th {
@@ -238,8 +241,13 @@
             min-width: 60px;
         }
         
-        .copy-btn:active {
+        .copy-btn:active:not(:disabled) {
             background: #1976D2;
+        }
+        
+        .copy-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
         }
         
         .copy-btn.copied {
@@ -404,7 +412,7 @@
         <div class="upload-section">
             <div class="input-group">
                 <label for="sheetName">Sheet名称：</label>
-                <input type="text" id="sheetName" placeholder="输入要读取的Sheet名称" value="Sheet1">
+                <input type="text" id="sheetName" placeholder="输入要读取的Sheet名称" value="">
             </div>
             
             <div class="input-group">
@@ -459,10 +467,10 @@
             <table class="data-table" id="dataTable">
                 <thead>
                     <tr>
-                        <th>序号</th>
-                        <th>邮箱</th>
-                        <th>状态</th>
-                        <th>操作</th>
+                        <th style="width: 15%;">序号</th>
+                        <th style="width: 45%;">邮箱</th>
+                        <th style="width: 20%;">状态</th>
+                        <th style="width: 20%;">操作</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
@@ -640,7 +648,7 @@
                 emailData = data.emailData || [];
                 currentIndex = data.currentIndex || 0;
                 copyHistory = data.copyHistory || [];
-                currentSheetName = data.currentSheetName || 'Sheet1';
+                currentSheetName = data.currentSheetName || '';
                 currentFileName = data.currentFileName || '';
                 
                 if (emailData.length > 0) {
@@ -898,7 +906,7 @@
                         emailData = data.emailData;
                         currentIndex = data.currentIndex || 0;
                         copyHistory = data.copyHistory || [];
-                        currentSheetName = data.currentSheetName || 'Sheet1';
+                        currentSheetName = data.currentSheetName || '';
                         
                         saveProgress();
                         updateUI();
@@ -964,6 +972,9 @@
             const currentEmail = emailData[index];
             currentIndex = index;
             
+            // 禁用复制按钮
+            disableCopyButton();
+            
             // 复制到剪贴板
             navigator.clipboard.writeText(currentEmail.email).then(() => {
                 handleCopySuccess(currentEmail);
@@ -980,6 +991,27 @@
                 
                 handleCopySuccess(currentEmail);
             });
+        }
+        
+        // 禁用复制按钮10秒
+        function disableCopyButton() {
+            const copyButton = document.getElementById('copyButton');
+            copyButton.disabled = true;
+            copyButton.style.background = '#cccccc';
+            copyButton.textContent = '已复制 (10秒后恢复)';
+            
+            let seconds = 10;
+            const countdown = setInterval(() => {
+                seconds--;
+                copyButton.textContent = `已复制 (${seconds}秒后恢复)`;
+                
+                if (seconds <= 0) {
+                    clearInterval(countdown);
+                    copyButton.disabled = false;
+                    copyButton.style.background = '#2196F3';
+                    copyButton.textContent = '复制当前邮箱';
+                }
+            }, 1000);
         }
         
         // 复制当前邮箱
