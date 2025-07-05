@@ -10,18 +10,19 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
             padding: 10px;
             margin: 0;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #f5f7fa, #e4edf9);
             -webkit-text-size-adjust: 100%;
             padding-bottom: 20px;
+            min-height: 100vh;
         }
         
         .container {
             background: white;
             padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             max-width: 100%;
-            margin-top: 80px; /* 为顶部按钮留出空间 */
+            margin-top: 85px;
         }
         
         /* 顶部复制按钮样式 */
@@ -30,66 +31,91 @@
             top: 10px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
+            width: 92%;
             max-width: 500px;
-            padding: 20px;
+            padding: 22px;
             background: #2196F3;
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
             z-index: 1000;
             text-align: center;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
         }
         
         .top-copy-button:active:not(:disabled) {
             background: #1976D2;
+            transform: translateX(-50%) scale(0.98);
         }
         
         .top-copy-button:disabled {
-            background: #cccccc;
+            background: #a0a0a0;
             cursor: not-allowed;
+            box-shadow: none;
         }
 
         h1 {
-            color: #333;
-            font-size: 20px;
-            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 22px;
+            margin-bottom: 18px;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 5px;
+            position: relative;
+            padding-bottom: 10px;
+        }
+        
+        h1:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: #3498db;
+            border-radius: 3px;
         }
         
         .upload-section {
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            margin-bottom: 18px;
+            padding: 18px;
+            background: #f8fafd;
+            border-radius: 12px;
+            border: 1px solid #e1e8f0;
         }
         
         .input-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         
         .input-group label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #555;
-            font-size: 14px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 15px;
         }
         
         .input-group input[type="text"] {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            padding: 12px 15px;
+            border: 1px solid #d1d9e6;
+            border-radius: 8px;
             font-size: 16px;
             box-sizing: border-box;
             -webkit-appearance: none;
+            background: #fff;
+            transition: border-color 0.3s;
+        }
+        
+        .input-group input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
         }
         
         .file-upload {
@@ -97,7 +123,7 @@
             display: inline-block;
             cursor: pointer;
             width: 100%;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .file-upload input[type="file"] {
@@ -110,17 +136,20 @@
         
         .file-upload-label {
             display: block;
-            padding: 12px 15px;
+            padding: 14px 15px;
             background: #4CAF50;
             color: white;
-            border-radius: 5px;
+            border-radius: 8px;
             text-align: center;
-            font-size: 14px;
-            transition: background 0.3s;
+            font-size: 15px;
+            transition: all 0.3s;
+            font-weight: 500;
+            letter-spacing: 0.5px;
         }
         
         .file-upload-label:active {
             background: #45a049;
+            transform: scale(0.98);
         }
         
         .progress-file-upload .file-upload-label {
@@ -132,85 +161,94 @@
         }
         
         .email-display {
-            margin: 15px 0;
+            margin: 18px 0;
+            border-radius: 12px;
+            overflow: hidden;
         }
         
         .email-item {
-            padding: 12px;
-            margin: 8px 0;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 16px;
+            margin: 0;
+            font-size: 15px;
             word-break: break-all;
+            position: relative;
         }
         
         .previous-email {
-            background: #f0f0f0;
-            border: 1px solid #ddd;
+            background: #f0f5ff;
+            border-bottom: 1px solid #d1e0ff;
         }
         
         .current-email {
-            background: #e8f4f8;
-            border: 2px solid #4CAF50;
-            font-weight: bold;
+            background: #e6f7ff;
+            border-top: 2px solid #4CAF50;
         }
         
         .clipboard-status {
-            background: #fff3cd;
-            border: 2px solid #ffc107;
-            padding: 12px;
-            margin: 10px 0;
-            border-radius: 8px;
+            background: #fff9e6;
+            border: 2px solid #ffd966;
+            padding: 14px;
+            margin: 15px 0;
+            border-radius: 10px;
             text-align: center;
         }
         
         .clipboard-label {
-            font-size: 12px;
-            color: #856404;
-            margin-bottom: 5px;
+            font-size: 13px;
+            color: #8a6d3b;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
         
         .clipboard-content {
             font-size: 16px;
             font-weight: bold;
-            color: #856404;
+            color: #8a6d3b;
             word-break: break-all;
+            padding: 5px;
         }
         
         .email-number {
-            color: #666;
+            color: #3498db;
             font-weight: bold;
             margin-right: 5px;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
         }
         
         .file-info {
-            font-size: 12px;
-            color: #666;
-            margin-top: 3px;
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
+            text-align: center;
         }
         
         .data-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 15px 0;
+            margin: 18px 0;
             font-size: 14px;
-            table-layout: fixed; /* 确保表格宽度固定 */
+            table-layout: fixed;
         }
         
         .data-table th, .data-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            border: 1px solid #e1e8f0;
+            padding: 10px 8px;
             text-align: left;
-            word-break: break-all; /* 确保长文本换行 */
+            word-break: break-word;
         }
         
         .data-table th {
-            background-color: #f2f2f2;
+            background-color: #f1f6fc;
             position: sticky;
             top: 0;
+            color: #2c3e50;
+            font-weight: 600;
         }
         
         .data-table tr:nth-child(even) {
-            background-color: #f9f9f9;
+            background-color: #f9fbfd;
         }
         
         .data-table tr.current-row {
@@ -223,30 +261,34 @@
         }
         
         .table-container {
-            max-height: 300px;
+            max-height: 320px;
             overflow-y: auto;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            margin: 18px 0;
+            border: 1px solid #e1e8f0;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
         
         .copy-btn {
             background: #2196F3;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             padding: 8px 12px;
             cursor: pointer;
             font-size: 14px;
-            min-width: 60px;
+            min-width: 70px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
         
         .copy-btn:active:not(:disabled) {
             background: #1976D2;
+            transform: scale(0.95);
         }
         
         .copy-btn:disabled {
-            background: #cccccc;
+            background: #b0b0b0;
             cursor: not-allowed;
         }
         
@@ -255,150 +297,223 @@
         }
         
         .message-container {
-            min-height: 50px;
-            margin: 10px 0;
+            min-height: 55px;
+            margin: 12px 0;
         }
         
         .status-message {
-            padding: 10px;
+            padding: 12px;
             margin: 0;
-            border-radius: 5px;
+            border-radius: 8px;
             text-align: center;
             display: none;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: 500;
         }
         
         .success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+            background: #dff0d8;
+            color: #3c763d;
+            border: 1px solid #d6e9c6;
             display: block;
         }
         
         .error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+            background: #f2dede;
+            color: #a94442;
+            border: 1px solid #ebccd1;
             display: block;
         }
         
         .warning {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
+            background: #fcf8e3;
+            color: #8a6d3b;
+            border: 1px solid #faebcc;
             display: block;
         }
         
         .button-group {
             display: flex;
-            gap: 8px;
-            margin-top: 10px;
+            gap: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
         
         .button-group button {
             flex: 1;
-            min-width: 100px;
-            padding: 15px;
+            min-width: 110px;
+            padding: 16px;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 16px;
             -webkit-appearance: none;
             font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .button-group button:active {
+            transform: scale(0.97);
         }
         
         .reset-button {
-            background: #f44336;
-        }
-        
-        .reset-button:active {
-            background: #d32f2f;
+            background: #e74c3c;
+            background: linear-gradient(to right, #e74c3c, #c0392b);
         }
         
         .export-button {
-            background: #9C27B0;
-        }
-        
-        .export-button:active {
-            background: #7B1FA2;
+            background: #9b59b6;
+            background: linear-gradient(to right, #9b59b6, #8e44ad);
         }
         
         .progress-info {
             text-align: center;
-            margin: 15px 0;
-            font-size: 16px;
-            color: #333;
+            margin: 18px 0;
+            font-size: 17px;
+            color: #2c3e50;
             font-weight: bold;
+            background: #f1f8ff;
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #d1e8ff;
         }
         
         .history-log {
-            margin-top: 15px;
-            padding: 12px;
-            background: #f5f5f5;
-            border-radius: 8px;
-            max-height: 150px;
+            margin-top: 18px;
+            padding: 14px;
+            background: #f8fafd;
+            border-radius: 12px;
+            max-height: 160px;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            border: 1px solid #e1e8f0;
         }
         
         .history-log h3 {
             margin-top: 0;
-            margin-bottom: 10px;
-            color: #333;
-            font-size: 16px;
+            margin-bottom: 12px;
+            color: #2c3e50;
+            font-size: 17px;
+            text-align: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e1e8f0;
         }
         
         .history-item {
-            padding: 5px 0;
-            border-bottom: 1px solid #ddd;
-            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid #eaeff5;
+            font-size: 13px;
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
         }
         
         .history-time {
-            color: #666;
+            color: #7f8c8d;
             font-size: 11px;
+            margin-top: 3px;
+        }
+        
+        .history-email {
+            font-size: 12px;
+            color: #2c3e50;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            margin-top: 3px;
         }
         
         .sheet-match-info {
             background: #e3f2fd;
             border: 1px solid #90caf9;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-size: 14px;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 8px;
+            font-size: 15px;
             text-align: center;
+            font-weight: 500;
         }
         
         .storage-status {
             font-size: 12px;
-            color: #666;
+            color: #7f8c8d;
             margin-top: 10px;
-            padding: 5px;
-            background: #f5f5f5;
-            border-radius: 3px;
+            padding: 8px;
+            background: #f8fafd;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px dashed #d1e8ff;
         }
         
         .settings-section {
-            margin-top: 15px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
+            margin-top: 18px;
+            padding: 16px;
+            background: #f8fafd;
+            border-radius: 12px;
+            border: 1px solid #e1e8f0;
         }
         
         .settings-toggle {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            padding: 8px;
+            background: #fff;
+            border-radius: 8px;
         }
         
         .settings-toggle input {
-            margin-right: 8px;
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
         }
         
         .settings-toggle label {
-            font-size: 14px;
+            font-size: 15px;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        /* 加载指示器 */
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        .loader .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            .top-copy-button {
+                padding: 18px;
+                font-size: 16px;
+            }
+            
+            .button-group button {
+                padding: 14px;
+                font-size: 15px;
+            }
+            
+            .data-table {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
@@ -442,7 +557,7 @@
         
         <div id="sheetMatchInfo" class="sheet-match-info" style="display: none;"></div>
         
-        <div class="progress-info" id="progressInfo"></div>
+        <div class="progress-info" id="progressInfo">请上传Excel文件开始</div>
         
         <div class="clipboard-status" id="clipboardStatus" style="display: none;">
             <div class="clipboard-label">当前剪贴板中的邮箱：</div>
@@ -451,15 +566,13 @@
         
         <div class="email-display">
             <div id="previousEmail" class="email-item previous-email" style="display: none;">
-                <div style="font-size: 12px; color: #888; margin-bottom: 5px;">上一个已复制：</div>
-                <span class="email-number"></span>
-                <span class="email-text"></span>
+                <div class="email-number">上一个已复制：<span id="prevTime"></span></div>
+                <div class="email-text"></div>
             </div>
             
             <div id="currentEmail" class="email-item current-email" style="display: none;">
-                <div style="font-size: 12px; color: #4CAF50; margin-bottom: 5px;">下一个待复制：</div>
-                <span class="email-number"></span>
-                <span class="email-text"></span>
+                <div class="email-number">下一个待复制：</div>
+                <div class="email-text"></div>
             </div>
         </div>
         
@@ -997,7 +1110,7 @@
         function disableCopyButton() {
             const copyButton = document.getElementById('copyButton');
             copyButton.disabled = true;
-            copyButton.style.background = '#cccccc';
+            copyButton.style.background = '#a0a0a0';
             copyButton.textContent = '已复制 (10秒后恢复)';
             
             let seconds = 10;
@@ -1023,13 +1136,22 @@
         function handleCopySuccess(currentEmail) {
             lastCopiedEmail = currentEmail.email;
             
+            // 获取当前时间（含时分秒）
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
             // 添加到复制历史
             const historyItem = {
                 number: currentEmail.number,
                 email: currentEmail.email,
-                time: new Date().toLocaleString('zh-CN'),
+                time: now.toLocaleString('zh-CN'),
                 index: currentIndex + 1,
-                timestamp: new Date().toISOString()
+                timestamp: now.toISOString(),
+                rowIndex: currentEmail.rowIndex
             };
             copyHistory.push(historyItem);
             
@@ -1073,7 +1195,16 @@
             if (currentIndex > 0) {
                 const prevEmail = emailData[currentIndex - 1];
                 previousEmailDiv.style.display = 'block';
-                previousEmailDiv.querySelector('.email-number').textContent = `序号 ${prevEmail.number} (第${prevEmail.rowIndex}行):`;
+                
+                // 获取复制时间（含时分秒）
+                const lastHistory = copyHistory[copyHistory.length - 1];
+                const timeString = lastHistory ? new Date(lastHistory.timestamp).toLocaleTimeString('zh-CN', { 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                }) : '';
+                
+                document.getElementById('prevTime').textContent = timeString;
                 previousEmailDiv.querySelector('.email-text').textContent = prevEmail.email;
             } else {
                 previousEmailDiv.style.display = 'none';
@@ -1083,7 +1214,6 @@
             if (currentIndex < emailData.length) {
                 const currEmail = emailData[currentIndex];
                 currentEmailDiv.style.display = 'block';
-                currentEmailDiv.querySelector('.email-number').textContent = `序号 ${currEmail.number} (第${currEmail.rowIndex}行):`;
                 currentEmailDiv.querySelector('.email-text').textContent = currEmail.email;
                 document.getElementById('copyButton').disabled = false;
                 document.getElementById('copyButton').textContent = '复制当前邮箱';
@@ -1106,8 +1236,9 @@
                 const recentHistory = copyHistory.slice(-5).reverse();
                 historyContent.innerHTML = recentHistory.map(item => `
                     <div class="history-item">
-                        <div>第${item.index}个 - 序号 ${item.number}: ${item.email}</div>
+                        <div>第${item.index}个 - 序号 ${item.number} (第${item.rowIndex}行)</div>
                         <div class="history-time">${item.time}</div>
+                        <div class="history-email">${item.email}</div>
                     </div>
                 `).join('');
             }
