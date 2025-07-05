@@ -1,0 +1,1155 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Excel邮箱复制助手</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            padding: 10px;
+            margin: 0;
+            background-color: #f5f5f5;
+            -webkit-text-size-adjust: 100%;
+            padding-bottom: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            max-width: 100%;
+            margin-top: 80px; /* 为顶部按钮留出空间 */
+        }
+        
+        /* 顶部复制按钮样式 */
+        .top-copy-button {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            padding: 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+            z-index: 1000;
+            text-align: center;
+        }
+        
+        .top-copy-button:active {
+            background: #1976D2;
+        }
+        
+        .top-copy-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .upload-section {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .input-group {
+            margin-bottom: 12px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+        
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+            -webkit-appearance: none;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+        
+        .file-upload input[type="file"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 12px 15px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        .file-upload-label:active {
+            background: #45a049;
+        }
+        
+        .progress-file-upload .file-upload-label {
+            background: #FF9800;
+        }
+        
+        .progress-file-upload .file-upload-label:active {
+            background: #F57C00;
+        }
+        
+        .email-display {
+            margin: 15px 0;
+        }
+        
+        .email-item {
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .previous-email {
+            background: #f0f0f0;
+            border: 1px solid #ddd;
+        }
+        
+        .current-email {
+            background: #e8f4f8;
+            border: 2px solid #4CAF50;
+            font-weight: bold;
+        }
+        
+        .clipboard-status {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .clipboard-label {
+            font-size: 12px;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .clipboard-content {
+            font-size: 16px;
+            font-weight: bold;
+            color: #856404;
+            word-break: break-all;
+        }
+        
+        .email-number {
+            color: #666;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .file-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 14px;
+        }
+        
+        .data-table th, .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .data-table tr.current-row {
+            background-color: #e3f2fd;
+            font-weight: bold;
+        }
+        
+        .data-table tr.copied-row {
+            background-color: #e8f5e9;
+        }
+        
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .copy-btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            min-width: 60px;
+        }
+        
+        .copy-btn:active {
+            background: #1976D2;
+        }
+        
+        .copy-btn.copied {
+            background: #4CAF50;
+        }
+        
+        .message-container {
+            min-height: 50px;
+            margin: 10px 0;
+        }
+        
+        .status-message {
+            padding: 10px;
+            margin: 0;
+            border-radius: 5px;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            display: block;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .button-group button {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            -webkit-appearance: none;
+            font-weight: bold;
+        }
+        
+        .reset-button {
+            background: #f44336;
+        }
+        
+        .reset-button:active {
+            background: #d32f2f;
+        }
+        
+        .export-button {
+            background: #9C27B0;
+        }
+        
+        .export-button:active {
+            background: #7B1FA2;
+        }
+        
+        .progress-info {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        .history-log {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 150px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .history-log h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 16px;
+        }
+        
+        .history-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+        
+        .history-time {
+            color: #666;
+            font-size: 11px;
+        }
+        
+        .sheet-match-info {
+            background: #e3f2fd;
+            border: 1px solid #90caf9;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .storage-status {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+            padding: 5px;
+            background: #f5f5f5;
+            border-radius: 3px;
+        }
+        
+        .settings-section {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .settings-toggle input {
+            margin-right: 8px;
+        }
+        
+        .settings-toggle label {
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部复制按钮 -->
+    <button id="copyButton" class="top-copy-button" disabled>复制当前邮箱</button>
+
+    <div class="container">
+        <h1>Excel邮箱复制助手</h1>
+        
+        <div class="upload-section">
+            <div class="input-group">
+                <label for="sheetName">Sheet名称：</label>
+                <input type="text" id="sheetName" placeholder="输入要读取的Sheet名称" value="Sheet1">
+            </div>
+            
+            <div class="input-group">
+                <div class="file-upload">
+                    <input type="file" id="fileInput" accept=".xlsx,.xls,.xlsm">
+                    <label for="fileInput" class="file-upload-label">选择Excel文件</label>
+                </div>
+                <div class="file-info">支持 .xlsx, .xls, .xlsm 格式</div>
+            </div>
+            
+            <div class="input-group">
+                <div class="file-upload progress-file-upload">
+                    <input type="file" id="progressFileInput" accept=".json">
+                    <label for="progressFileInput" class="file-upload-label">导入进度文件（可选）</label>
+                </div>
+                <div class="file-info">可选：导入之前的进度继续复制</div>
+            </div>
+        </div>
+        
+        <div class="settings-section">
+            <h3>设置选项</h3>
+            <div class="settings-toggle">
+                <input type="checkbox" id="autoSave" checked>
+                <label for="autoSave">自动保存进度</label>
+            </div>
+        </div>
+        
+        <div id="sheetMatchInfo" class="sheet-match-info" style="display: none;"></div>
+        
+        <div class="progress-info" id="progressInfo"></div>
+        
+        <div class="clipboard-status" id="clipboardStatus" style="display: none;">
+            <div class="clipboard-label">当前剪贴板中的邮箱：</div>
+            <div class="clipboard-content" id="clipboardContent"></div>
+        </div>
+        
+        <div class="email-display">
+            <div id="previousEmail" class="email-item previous-email" style="display: none;">
+                <div style="font-size: 12px; color: #888; margin-bottom: 5px;">上一个已复制：</div>
+                <span class="email-number"></span>
+                <span class="email-text"></span>
+            </div>
+            
+            <div id="currentEmail" class="email-item current-email" style="display: none;">
+                <div style="font-size: 12px; color: #4CAF50; margin-bottom: 5px;">下一个待复制：</div>
+                <span class="email-number"></span>
+                <span class="email-text"></span>
+            </div>
+        </div>
+        
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>序号</th>
+                        <th>邮箱</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+            <div class="storage-status" id="storageStatus"></div>
+        </div>
+        
+        <!-- 消息容器 -->
+        <div class="message-container">
+            <div id="statusMessage" class="status-message"></div>
+        </div>
+        
+        <div class="button-group" id="controlButtons" style="display: none;">
+            <button id="resetButton" class="reset-button">重新开始</button>
+            <button id="exportButton" class="export-button">导出记录</button>
+        </div>
+        
+        <div class="history-log" id="historyLog" style="display: none;">
+            <h3>复制历史记录</h3>
+            <div id="historyContent"></div>
+        </div>
+    </div>
+
+    <script>
+        // 数据存储键名
+        const STORAGE_KEY = 'emailCopyProgress';
+        const HISTORY_KEY = 'emailCopyHistory';
+        const SETTINGS_KEY = 'emailCopySettings';
+        const DB_NAME = 'EmailCopyDB';
+        const DB_VERSION = 1;
+        
+        // 全局变量
+        let emailData = [];
+        let currentIndex = 0;
+        let copyHistory = [];
+        let lastCopiedEmail = '';
+        let currentSheetName = '';
+        let currentFileName = '';
+        let db = null;
+        let settings = {
+            autoSave: true
+        };
+        
+        // 初始化IndexedDB
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = (event) => {
+                    console.error('IndexedDB打开失败:', event.target.error);
+                    reject(event.target.error);
+                };
+                
+                request.onsuccess = (event) => {
+                    db = event.target.result;
+                    resolve(db);
+                };
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains('progress')) {
+                        db.createObjectStore('progress', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('history')) {
+                        const store = db.createObjectStore('history', { keyPath: 'timestamp' });
+                        store.createIndex('by_index', 'index', { unique: false });
+                    }
+                };
+            });
+        }
+        
+        // 加载设置
+        function loadSettings() {
+            const savedSettings = localStorage.getItem(SETTINGS_KEY);
+            if (savedSettings) {
+                try {
+                    settings = JSON.parse(savedSettings);
+                    document.getElementById('autoSave').checked = settings.autoSave;
+                } catch (error) {
+                    console.error('加载设置失败:', error);
+                }
+            }
+        }
+        
+        // 保存设置
+        function saveSettings() {
+            settings.autoSave = document.getElementById('autoSave').checked;
+            localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+        }
+        
+        // 双重存储：保存进度
+        async function saveProgress() {
+            if (!settings.autoSave) return;
+            
+            const data = {
+                emailData: emailData,
+                currentIndex: currentIndex,
+                copyHistory: copyHistory,
+                currentSheetName: currentSheetName,
+                currentFileName: currentFileName,
+                timestamp: new Date().toISOString()
+            };
+            
+            // 保存到LocalStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            
+            // 保存到IndexedDB
+            if (db) {
+                try {
+                    const transaction = db.transaction(['progress', 'history'], 'readwrite');
+                    const progressStore = transaction.objectStore('progress');
+                    const historyStore = transaction.objectStore('history');
+                    
+                    // 保存进度
+                    await progressStore.put({ id: 1, data: data });
+                    
+                    // 保存历史记录
+                    if (copyHistory.length > 0) {
+                        const lastHistory = copyHistory[copyHistory.length - 1];
+                        await historyStore.put({
+                            timestamp: lastHistory.timestamp,
+                            data: lastHistory
+                        });
+                    }
+                    
+                    updateStorageStatus('数据已保存到本地存储和IndexedDB');
+                } catch (error) {
+                    console.error('IndexedDB保存失败:', error);
+                    updateStorageStatus('数据保存到本地存储，IndexedDB失败');
+                }
+            } else {
+                updateStorageStatus('数据已保存到本地存储');
+            }
+        }
+        
+        // 双重存储：加载进度
+        async function loadProgress() {
+            let data = null;
+            
+            // 先从IndexedDB尝试加载
+            if (db) {
+                try {
+                    const transaction = db.transaction(['progress'], 'readonly');
+                    const store = transaction.objectStore('progress');
+                    const request = store.get(1);
+                    
+                    const result = await new Promise((resolve, reject) => {
+                        request.onsuccess = () => resolve(request.result);
+                        request.onerror = (event) => reject(event.target.error);
+                    });
+                    
+                    if (result && result.data) {
+                        data = result.data;
+                        updateStorageStatus('从IndexedDB恢复进度');
+                    }
+                } catch (error) {
+                    console.error('从IndexedDB加载失败:', error);
+                }
+            }
+            
+            // 如果IndexedDB没有，尝试从LocalStorage加载
+            if (!data) {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    try {
+                        data = JSON.parse(saved);
+                        updateStorageStatus('从本地存储恢复进度');
+                    } catch (error) {
+                        console.error('解析本地存储数据失败:', error);
+                    }
+                }
+            }
+            
+            if (data) {
+                emailData = data.emailData || [];
+                currentIndex = data.currentIndex || 0;
+                copyHistory = data.copyHistory || [];
+                currentSheetName = data.currentSheetName || 'Sheet1';
+                currentFileName = data.currentFileName || '';
+                
+                if (emailData.length > 0) {
+                    renderTable();
+                    updateUI();
+                    document.getElementById('copyButton').disabled = false;
+                    document.getElementById('controlButtons').style.display = 'flex';
+                    document.getElementById('tableContainer').style.display = 'block';
+                    
+                    if (currentIndex > 0) {
+                        const lastEmail = emailData[currentIndex - 1];
+                        updateClipboardStatus(lastEmail);
+                    }
+                }
+            }
+        }
+        
+        // 加载历史记录
+        async function loadHistory() {
+            if (db) {
+                try {
+                    const transaction = db.transaction(['history'], 'readonly');
+                    const store = transaction.objectStore('history');
+                    const index = store.index('by_index');
+                    const request = index.getAll();
+                    
+                    request.onsuccess = (event) => {
+                        const historyItems = event.target.result;
+                        if (historyItems && historyItems.length > 0) {
+                            copyHistory = historyItems.map(item => item.data).sort((a, b) => a.index - b.index);
+                            updateHistoryDisplay();
+                        }
+                    };
+                } catch (error) {
+                    console.error('从IndexedDB加载历史记录失败:', error);
+                }
+            }
+            
+            const savedHistory = localStorage.getItem(HISTORY_KEY);
+            if (savedHistory) {
+                try {
+                    const history = JSON.parse(savedHistory);
+                    if (history.length > 0) {
+                        copyHistory = history;
+                        updateHistoryDisplay();
+                    }
+                } catch (error) {
+                    console.error('解析历史记录失败:', error);
+                }
+            }
+        }
+        
+        // 渲染数据表格
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            tableBody.innerHTML = '';
+            
+            emailData.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.id = `row-${index}`;
+                
+                if (index === currentIndex) {
+                    row.classList.add('current-row');
+                } else if (index < currentIndex) {
+                    row.classList.add('copied-row');
+                }
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = index < currentIndex ? '已复制' : '复制';
+                if (index < currentIndex) {
+                    copyBtn.classList.add('copied');
+                }
+                
+                copyBtn.addEventListener('click', () => {
+                    copyEmail(index);
+                });
+                
+                row.innerHTML = `
+                    <td>${item.number}</td>
+                    <td>${item.email}</td>
+                    <td>${index < currentIndex ? '✓ 已复制' : index === currentIndex ? '→ 当前' : '待复制'}</td>
+                    <td></td>
+                `;
+                
+                row.querySelector('td:last-child').appendChild(copyBtn);
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // 滚动到当前行
+        function scrollToCurrentRow() {
+            if (currentIndex >= 0 && currentIndex < emailData.length) {
+                const rowElement = document.getElementById(`row-${currentIndex}`);
+                if (rowElement) {
+                    rowElement.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+                }
+            }
+        }
+        
+        // 更新存储状态显示
+        function updateStorageStatus(message) {
+            const statusDiv = document.getElementById('storageStatus');
+            statusDiv.textContent = `存储状态: ${message} - ${new Date().toLocaleTimeString()}`;
+        }
+        
+        // 文件上传处理
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            currentFileName = file.name;
+            
+            // 检查文件类型
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls') && !fileName.endsWith('.xlsm')) {
+                showMessage('error', '请选择Excel文件（.xlsx, .xls, .xlsm）');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const sheetName = document.getElementById('sheetName').value || 'Sheet1';
+                    currentSheetName = sheetName;
+                    
+                    if (!workbook.Sheets[sheetName]) {
+                        const availableSheets = Object.keys(workbook.Sheets).join(', ');
+                        showMessage('error', `找不到名为 "${sheetName}" 的工作表。可用的工作表: ${availableSheets}`);
+                        return;
+                    }
+                    
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    // 读取A2:B101的数据
+                    emailData = [];
+                    for (let i = 2; i <= 101; i++) {
+                        const numberCell = worksheet[`A${i}`];
+                        const emailCell = worksheet[`B${i}`];
+                        
+                        if (numberCell && emailCell) {
+                            emailData.push({
+                                number: numberCell.v,
+                                email: emailCell.v,
+                                rowIndex: i - 1
+                            });
+                        }
+                    }
+                    
+                    if (emailData.length === 0) {
+                        showMessage('error', '没有找到有效的数据（请确保数据在A2:B101范围内）');
+                        return;
+                    }
+                    
+                    // 检查是否有进度文件
+                    const savedProgress = localStorage.getItem(STORAGE_KEY);
+                    if (savedProgress) {
+                        const progressData = JSON.parse(savedProgress);
+                        if (progressData.currentSheetName === sheetName && progressData.emailData.length > 0) {
+                            if (confirm('检测到之前的进度，是否继续？')) {
+                                // 验证数据是否匹配
+                                if (verifyDataMatch(emailData, progressData.emailData)) {
+                                    currentIndex = progressData.currentIndex || 0;
+                                    copyHistory = progressData.copyHistory || [];
+                                    showMessage('success', `已恢复进度，继续从第 ${currentIndex + 1} 个开始`);
+                                } else {
+                                    showMessage('warning', '数据不匹配，将重新开始');
+                                    currentIndex = 0;
+                                    copyHistory = [];
+                                }
+                            } else {
+                                currentIndex = 0;
+                                copyHistory = [];
+                            }
+                        } else {
+                            currentIndex = 0;
+                            copyHistory = [];
+                        }
+                    } else {
+                        currentIndex = 0;
+                        copyHistory = [];
+                    }
+                    
+                    // 渲染表格并保存
+                    renderTable();
+                    saveProgress();
+                    updateUI();
+                    scrollToCurrentRow();
+                    showMessage('success', `成功加载 ${emailData.length} 条数据`);
+                    document.getElementById('copyButton').disabled = false;
+                    document.getElementById('controlButtons').style.display = 'flex';
+                    document.getElementById('tableContainer').style.display = 'block';
+                    document.getElementById('sheetMatchInfo').style.display = 'none';
+                    
+                } catch (error) {
+                    showMessage('error', '读取文件失败：' + error.message);
+                    console.error('详细错误:', error);
+                }
+            };
+            
+            reader.readAsArrayBuffer(file);
+        });
+        
+        // 进度文件上传处理
+        document.getElementById('progressFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (!data.emailData || !Array.isArray(data.emailData)) {
+                        showMessage('error', '无效的进度文件');
+                        return;
+                    }
+                    
+                    // 检查当前是否已加载Excel文件
+                    if (emailData.length > 0) {
+                        // 验证进度文件是否匹配当前sheet
+                        const matchResult = checkProgressMatch(data);
+                        
+                        if (matchResult.isMatch) {
+                            document.getElementById('sheetMatchInfo').style.display = 'block';
+                            document.getElementById('sheetMatchInfo').textContent = 
+                                `✓ 进度文件匹配当前Sheet: ${currentSheetName}`;
+                            
+                            currentIndex = data.currentIndex || 0;
+                            copyHistory = data.copyHistory || [];
+                            
+                            saveProgress();
+                            updateUI();
+                            scrollToCurrentRow();
+                            updateHistoryDisplay();
+                            
+                            showMessage('success', `成功导入进度，当前进度: ${currentIndex}/${emailData.length}`);
+                        } else {
+                            showMessage('error', `进度文件不匹配！进度文件的Sheet: ${data.currentSheetName || '未知'}，当前Sheet: ${currentSheetName}`);
+                            document.getElementById('sheetMatchInfo').style.display = 'block';
+                            document.getElementById('sheetMatchInfo').textContent = 
+                                `✗ 进度文件不匹配当前Sheet`;
+                            document.getElementById('sheetMatchInfo').style.background = '#ffebee';
+                            document.getElementById('sheetMatchInfo').style.borderColor = '#ef5350';
+                            document.getElementById('sheetMatchInfo').style.color = '#c62828';
+                        }
+                    } else {
+                        // 如果还没有加载Excel，直接加载进度
+                        emailData = data.emailData;
+                        currentIndex = data.currentIndex || 0;
+                        copyHistory = data.copyHistory || [];
+                        currentSheetName = data.currentSheetName || 'Sheet1';
+                        
+                        saveProgress();
+                        updateUI();
+                        scrollToCurrentRow();
+                        updateHistoryDisplay();
+                        
+                        showMessage('warning', `已加载进度文件，请确保上传对应的Excel文件（Sheet: ${currentSheetName}）`);
+                        document.getElementById('copyButton').disabled = false;
+                        document.getElementById('controlButtons').style.display = 'flex';
+                        document.getElementById('tableContainer').style.display = 'block';
+                    }
+                    
+                } catch (error) {
+                    showMessage('error', '读取进度文件失败：' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        });
+        
+        // 检查进度匹配
+        function checkProgressMatch(progressData) {
+            // 检查sheet名称是否匹配
+            if (progressData.currentSheetName !== currentSheetName) {
+                return { isMatch: false, reason: 'Sheet名称不匹配' };
+            }
+            
+            // 检查邮箱数据是否匹配
+            const progressEmails = progressData.emailData.map(item => item.email);
+            const currentEmails = emailData.map(item => item.email);
+            
+            // 检查进度文件中的邮箱是否都在当前sheet中
+            for (let i = 0; i < Math.min(progressEmails.length, currentEmails.length); i++) {
+                if (progressEmails[i] !== currentEmails[i]) {
+                    return { isMatch: false, reason: '邮箱数据不匹配' };
+                }
+            }
+            
+            return { isMatch: true };
+        }
+        
+        // 验证数据匹配
+        function verifyDataMatch(currentData, savedData) {
+            if (currentData.length !== savedData.length) return false;
+            
+            for (let i = 0; i < currentData.length; i++) {
+                if (currentData[i].email !== savedData[i].email || 
+                    currentData[i].number !== savedData[i].number) {
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // 复制指定行的邮箱
+        function copyEmail(index) {
+            if (index >= emailData.length) {
+                showMessage('success', '所有邮箱已复制完成！');
+                return;
+            }
+            
+            const currentEmail = emailData[index];
+            currentIndex = index;
+            
+            // 复制到剪贴板
+            navigator.clipboard.writeText(currentEmail.email).then(() => {
+                handleCopySuccess(currentEmail);
+            }).catch(err => {
+                // 如果剪贴板API失败，使用备用方法
+                const textArea = document.createElement('textarea');
+                textArea.value = currentEmail.email;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                handleCopySuccess(currentEmail);
+            });
+        }
+        
+        // 复制当前邮箱
+        document.getElementById('copyButton').addEventListener('click', function() {
+            copyEmail(currentIndex);
+        });
+        
+        // 处理复制成功
+        function handleCopySuccess(currentEmail) {
+            lastCopiedEmail = currentEmail.email;
+            
+            // 添加到复制历史
+            const historyItem = {
+                number: currentEmail.number,
+                email: currentEmail.email,
+                time: new Date().toLocaleString('zh-CN'),
+                index: currentIndex + 1,
+                timestamp: new Date().toISOString()
+            };
+            copyHistory.push(historyItem);
+            
+            showMessage('success', `已复制: ${currentEmail.email} (第${currentEmail.rowIndex}行)`);
+            currentIndex++;
+            
+            // 保存进度
+            saveProgress();
+            
+            // 更新界面
+            renderTable();
+            updateUI();
+            scrollToCurrentRow();
+            updateHistoryDisplay();
+            updateClipboardStatus(currentEmail);
+        }
+        
+        // 更新剪贴板状态
+        function updateClipboardStatus(emailInfo) {
+            const clipboardStatus = document.getElementById('clipboardStatus');
+            const clipboardContent = document.getElementById('clipboardContent');
+            
+            clipboardStatus.style.display = 'block';
+            clipboardContent.textContent = `序号 ${emailInfo.number}: ${emailInfo.email} (第${emailInfo.rowIndex}行)`;
+        }
+        
+        // 更新UI
+        function updateUI() {
+            // 更新进度信息
+            const progressInfo = document.getElementById('progressInfo');
+            if (emailData.length > 0) {
+                const currentRow = emailData[currentIndex]?.rowIndex || currentIndex + 1;
+                progressInfo.textContent = `进度: ${currentIndex}/${emailData.length} (当前行: ${currentRow})`;
+            }
+            
+            // 更新邮箱显示
+            const previousEmailDiv = document.getElementById('previousEmail');
+            const currentEmailDiv = document.getElementById('currentEmail');
+            
+            // 显示上一个已复制的邮箱
+            if (currentIndex > 0) {
+                const prevEmail = emailData[currentIndex - 1];
+                previousEmailDiv.style.display = 'block';
+                previousEmailDiv.querySelector('.email-number').textContent = `序号 ${prevEmail.number} (第${prevEmail.rowIndex}行):`;
+                previousEmailDiv.querySelector('.email-text').textContent = prevEmail.email;
+            } else {
+                previousEmailDiv.style.display = 'none';
+            }
+            
+            // 显示当前要复制的邮箱
+            if (currentIndex < emailData.length) {
+                const currEmail = emailData[currentIndex];
+                currentEmailDiv.style.display = 'block';
+                currentEmailDiv.querySelector('.email-number').textContent = `序号 ${currEmail.number} (第${currEmail.rowIndex}行):`;
+                currentEmailDiv.querySelector('.email-text').textContent = currEmail.email;
+                document.getElementById('copyButton').disabled = false;
+                document.getElementById('copyButton').textContent = '复制当前邮箱';
+            } else {
+                currentEmailDiv.style.display = 'none';
+                document.getElementById('copyButton').textContent = '已完成所有复制';
+                document.getElementById('copyButton').disabled = true;
+            }
+        }
+        
+        // 更新历史记录显示
+        function updateHistoryDisplay() {
+            const historyLog = document.getElementById('historyLog');
+            const historyContent = document.getElementById('historyContent');
+            
+            if (copyHistory.length > 0) {
+                historyLog.style.display = 'block';
+                
+                // 显示最近的5条记录（手机屏幕较小）
+                const recentHistory = copyHistory.slice(-5).reverse();
+                historyContent.innerHTML = recentHistory.map(item => `
+                    <div class="history-item">
+                        <div>第${item.index}个 - 序号 ${item.number}: ${item.email}</div>
+                        <div class="history-time">${item.time}</div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        // 重置进度
+        document.getElementById('resetButton').addEventListener('click', function() {
+            if (confirm('确定要重新开始吗？这将清除当前进度。')) {
+                currentIndex = 0;
+                copyHistory = [];
+                saveProgress();
+                updateUI();
+                updateHistoryDisplay();
+                document.getElementById('clipboardStatus').style.display = 'none';
+                renderTable();
+                scrollToCurrentRow();
+                showMessage('success', '进度已重置');
+            }
+        });
+        
+        // 导出记录
+        document.getElementById('exportButton').addEventListener('click', function() {
+            if (copyHistory.length === 0) {
+                showMessage('error', '没有复制记录可导出');
+                return;
+            }
+            
+            let csvContent = '\ufeff序号,邮箱,复制时间,复制顺序,行号\n';
+            copyHistory.forEach(item => {
+                const emailInfo = emailData[item.index - 1];
+                const rowNumber = emailInfo ? emailInfo.rowIndex : '';
+                csvContent += `${item.number},${item.email},${item.time},${item.index},${rowNumber}\n`;
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `复制记录_${currentSheetName}_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}_${new Date().toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'}).replace(/:/g, '-')}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showMessage('success', '复制记录已保存到下载目录');
+        });
+        
+        // 设置变更监听
+        document.getElementById('autoSave').addEventListener('change', saveSettings);
+        
+        // 显示消息
+        function showMessage(type, message) {
+            const messageDiv = document.getElementById('statusMessage');
+            messageDiv.className = `status-message ${type}`;
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // 页面加载时初始化
+        window.onload = async function() {
+            await initDB();
+            loadSettings();
+            loadProgress();
+            loadHistory();
+        };
+        
+        // 页面卸载前尝试最后保存
+        window.addEventListener('beforeunload', function() {
+            if (settings.autoSave && emailData.length > 0) {
+                saveProgress();
+            }
+        });
+    </script>
+</body>
+</html>
