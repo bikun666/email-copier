@@ -1095,14 +1095,14 @@
             });
         }
         
-        // 禁用复制按钮5秒
+        // 禁用复制按钮2秒
         function disableCopyButton() {
             const copyButton = document.getElementById('copyButton');
             copyButton.disabled = true;
             copyButton.style.background = 'linear-gradient(135deg, #a0a0a0, #808080)';
-            copyButton.textContent = '已复制 (5秒后恢复)';
+            copyButton.textContent = '已复制 (2秒后恢复)';
             
-            let seconds = 5;
+            let seconds = 2;
             const countdown = setInterval(() => {
                 seconds--;
                 copyButton.textContent = `已复制 (${seconds}秒后恢复)`;
