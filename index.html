@@ -69,9 +69,16 @@
             box-shadow: none;
         }
         
+        .copy-status-text {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+        }
+        
         .file-name-display {
             font-size: 16px;
-            margin-bottom: 10px;
+            margin: 5px 0;
             background: rgba(255, 255, 255, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
@@ -84,7 +91,7 @@
         
         .sheet-name-display {
             font-size: 16px;
-            margin-top: 10px;
+            margin-top: 5px;
             background: rgba(255, 255, 255, 0.2);
             padding: 4px 12px;
             border-radius: 20px;
@@ -508,6 +515,10 @@
                 min-height: 150px;
             }
             
+            .copy-status-text {
+                font-size: 20px;
+            }
+            
             .file-name-display, .sheet-name-display {
                 font-size: 14px;
             }
@@ -549,9 +560,9 @@
     </style>
 </head>
 <body>
-    <!-- 顶部复制按钮 - 添加文件名和Sheet名 -->
+    <!-- 顶部复制按钮 - 按照要求的顺序 -->
     <button id="copyButton" class="top-copy-button" disabled>
-        <div>复制当前邮箱</div>
+        <div id="copyStatusText" class="copy-status-text">复制当前邮箱</div>
         <div id="fileNameDisplay" class="file-name-display">【未选择文件】</div>
         <div id="sheetNameDisplay" class="sheet-name-display">【未选择Sheet】</div>
     </button>
@@ -1182,18 +1193,18 @@
             const copyButton = document.getElementById('copyButton');
             copyButton.disabled = true;
             copyButton.style.background = 'linear-gradient(135deg, #a0a0a0, #808080)';
-            copyButton.querySelector('div:nth-child(2)').textContent = '已复制 (2秒后恢复)';
+            document.getElementById('copyStatusText').textContent = '已复制 (2秒后恢复)';
             
             let seconds = 2;
             const countdown = setInterval(() => {
                 seconds--;
-                copyButton.querySelector('div:nth-child(2)').textContent = `已复制 (${seconds}秒后恢复)`;
+                document.getElementById('copyStatusText').textContent = `已复制 (${seconds}秒后恢复)`;
                 
                 if (seconds <= 0) {
                     clearInterval(countdown);
                     copyButton.disabled = false;
                     copyButton.style.background = 'linear-gradient(135deg, #2196F3, #1976D2)';
-                    copyButton.querySelector('div:nth-child(2)').textContent = '复制当前邮箱';
+                    document.getElementById('copyStatusText').textContent = '复制当前邮箱';
                 }
             }, 1000);
         }
@@ -1278,9 +1289,9 @@
             // 更新复制按钮状态
             if (currentIndex < emailData.length) {
                 document.getElementById('copyButton').disabled = false;
-                document.getElementById('copyButton').querySelector('div:nth-child(2)').textContent = '复制当前邮箱';
+                document.getElementById('copyStatusText').textContent = '复制当前邮箱';
             } else {
-                document.getElementById('copyButton').querySelector('div:nth-child(2)').textContent = '已完成所有复制';
+                document.getElementById('copyStatusText').textContent = '已完成所有复制';
                 document.getElementById('copyButton').disabled = true;
             }
         }
