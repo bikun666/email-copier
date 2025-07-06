@@ -28,7 +28,7 @@
             border-radius: 15px;
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             max-width: 100%;
-            margin-top: 180px; /* 增加顶部间距适应更大的按钮 */
+            margin-top: 180px;
             position: relative;
         }
         
@@ -40,12 +40,12 @@
             transform: translateX(-50%);
             width: 92%;
             max-width: 500px;
-            padding: 88px 22px; /* 上下padding变为4倍 */
+            padding: 22px;
             background: linear-gradient(135deg, #2196F3, #1976D2);
             color: white;
             border: none;
             border-radius: 12px;
-            font-size: 20px; /* 增大字体 */
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(33, 150, 243, 0.35);
@@ -56,7 +56,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            min-height: 200px; /* 确保最小高度 */
+            min-height: 200px;
         }
         
         .top-copy-button:active:not(:disabled) {
@@ -69,6 +69,19 @@
             box-shadow: none;
         }
         
+        .file-name-display {
+            font-size: 16px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 500;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
         .sheet-name-display {
             font-size: 16px;
             margin-top: 10px;
@@ -76,6 +89,10 @@
             padding: 4px 12px;
             border-radius: 20px;
             font-weight: 500;
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         h1 {
@@ -486,18 +503,17 @@
         /* 响应式调整 */
         @media (max-width: 480px) {
             .top-copy-button {
-                padding: 44px 18px; /* 小屏幕下也保持高度增加 */
+                padding: 22px;
                 font-size: 18px;
                 min-height: 150px;
             }
             
-            .sheet-name-display {
+            .file-name-display, .sheet-name-display {
                 font-size: 14px;
-                margin-top: 8px;
             }
             
             .container {
-                margin-top: 160px; /* 小屏幕下调整容器上边距 */
+                margin-top: 160px;
             }
             
             .button-group button {
@@ -533,8 +549,9 @@
     </style>
 </head>
 <body>
-    <!-- 顶部复制按钮 - 高度变为4倍并添加sheet名称 -->
+    <!-- 顶部复制按钮 - 添加文件名和Sheet名 -->
     <button id="copyButton" class="top-copy-button" disabled>
+        <div id="fileNameDisplay" class="file-name-display">【未选择文件】</div>
         <div>复制当前邮箱</div>
         <div id="sheetNameDisplay" class="sheet-name-display">【未选择Sheet】</div>
     </button>
@@ -637,6 +654,23 @@
             autoSave: true,
             callShortcut: true
         };
+        
+        // 更新文件名显示
+        function updateFileNameDisplay() {
+            const displayElement = document.getElementById('fileNameDisplay');
+            if (currentFileName) {
+                // 保留文件名前10个字符和后10个字符（如果文件名很长）
+                if (currentFileName.length > 30) {
+                    const prefix = currentFileName.substring(0, 15);
+                    const suffix = currentFileName.substring(currentFileName.length - 15);
+                    displayElement.textContent = `【${prefix}...${suffix}】`;
+                } else {
+                    displayElement.textContent = `【${currentFileName}】`;
+                }
+            } else {
+                displayElement.textContent = '【未选择文件】';
+            }
+        }
         
         // 更新Sheet名称显示
         function updateSheetNameDisplay() {
@@ -787,7 +821,8 @@
                 currentSheetName = data.currentSheetName || '';
                 currentFileName = data.currentFileName || '';
                 
-                // 更新Sheet名称显示
+                // 更新显示
+                updateFileNameDisplay();
                 updateSheetNameDisplay();
                 
                 if (emailData.length > 0) {
@@ -904,6 +939,7 @@
             if (!file) return;
             
             currentFileName = file.name;
+            updateFileNameDisplay();
             
             // 检查文件类型
             const fileName = file.name.toLowerCase();
@@ -920,8 +956,6 @@
                     
                     const sheetName = document.getElementById('sheetName').value || 'Sheet1';
                     currentSheetName = sheetName;
-                    
-                    // 更新Sheet名称显示
                     updateSheetNameDisplay();
                     
                     if (!workbook.Sheets[sheetName]) {
@@ -1051,8 +1085,10 @@
                         currentIndex = data.currentIndex || 0;
                         copyHistory = data.copyHistory || [];
                         currentSheetName = data.currentSheetName || '';
+                        currentFileName = data.currentFileName || '';
                         
-                        // 更新Sheet名称显示
+                        // 更新显示
+                        updateFileNameDisplay();
                         updateSheetNameDisplay();
                         
                         saveProgress();
@@ -1146,18 +1182,18 @@
             const copyButton = document.getElementById('copyButton');
             copyButton.disabled = true;
             copyButton.style.background = 'linear-gradient(135deg, #a0a0a0, #808080)';
-            copyButton.querySelector('div:first-child').textContent = '已复制 (2秒后恢复)';
+            copyButton.querySelector('div:nth-child(2)').textContent = '已复制 (2秒后恢复)';
             
             let seconds = 2;
             const countdown = setInterval(() => {
                 seconds--;
-                copyButton.querySelector('div:first-child').textContent = `已复制 (${seconds}秒后恢复)`;
+                copyButton.querySelector('div:nth-child(2)').textContent = `已复制 (${seconds}秒后恢复)`;
                 
                 if (seconds <= 0) {
                     clearInterval(countdown);
                     copyButton.disabled = false;
                     copyButton.style.background = 'linear-gradient(135deg, #2196F3, #1976D2)';
-                    copyButton.querySelector('div:first-child').textContent = '复制当前邮箱';
+                    copyButton.querySelector('div:nth-child(2)').textContent = '复制当前邮箱';
                 }
             }, 1000);
         }
@@ -1242,9 +1278,9 @@
             // 更新复制按钮状态
             if (currentIndex < emailData.length) {
                 document.getElementById('copyButton').disabled = false;
-                document.getElementById('copyButton').querySelector('div:first-child').textContent = '复制当前邮箱';
+                document.getElementById('copyButton').querySelector('div:nth-child(2)').textContent = '复制当前邮箱';
             } else {
-                document.getElementById('copyButton').querySelector('div:first-child').textContent = '已完成所有复制';
+                document.getElementById('copyButton').querySelector('div:nth-child(2)').textContent = '已完成所有复制';
                 document.getElementById('copyButton').disabled = true;
             }
         }
@@ -1330,6 +1366,7 @@
         
         // 页面加载时初始化
         window.onload = async function() {
+            updateFileNameDisplay(); // 初始化显示文件名
             updateSheetNameDisplay(); // 初始化显示Sheet名称
             await initDB();
             loadSettings();
