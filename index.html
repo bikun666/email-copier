@@ -101,6 +101,16 @@
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        
+        .progress-display {
+            font-size: 15px;
+            margin-top: 12px;
+            padding: 6px 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 20px;
+            font-weight: 500;
+            max-width: 90%;
+        }
 
         h1 {
             color: #2c3e50;
@@ -510,9 +520,9 @@
         /* 响应式调整 */
         @media (max-width: 480px) {
             .top-copy-button {
-                padding: 22px;
+                padding: 18px;
                 font-size: 18px;
-                min-height: 150px;
+                min-height: 180px;
             }
             
             .copy-status-text {
@@ -523,8 +533,12 @@
                 font-size: 14px;
             }
             
+            .progress-display {
+                font-size: 14px;
+            }
+            
             .container {
-                margin-top: 160px;
+                margin-top: 170px;
             }
             
             .button-group button {
@@ -560,11 +574,12 @@
     </style>
 </head>
 <body>
-    <!-- 顶部复制按钮 - 按照要求的顺序 -->
+    <!-- 顶部复制按钮 - 添加进度显示 -->
     <button id="copyButton" class="top-copy-button" disabled>
         <div id="copyStatusText" class="copy-status-text">复制当前邮箱</div>
         <div id="fileNameDisplay" class="file-name-display">【未选择文件】</div>
         <div id="sheetNameDisplay" class="sheet-name-display">【未选择Sheet】</div>
+        <div id="progressDisplay" class="progress-display">当前：第 0 个 / 共 0 个</div>
     </button>
 
     <div class="container">
@@ -690,6 +705,20 @@
                 displayElement.textContent = `【${currentSheetName}】`;
             } else {
                 displayElement.textContent = '【未选择Sheet】';
+            }
+        }
+        
+        // 更新进度显示
+        function updateProgressDisplay() {
+            const progressElement = document.getElementById('progressDisplay');
+            const total = emailData.length;
+            const current = currentIndex;
+            
+            if (total > 0) {
+                progressElement.textContent = `当前：第 ${current + 1} 个 / 共 ${total} 个`;
+                progressElement.style.display = 'block';
+            } else {
+                progressElement.textContent = '当前：第 0 个 / 共 0 个';
             }
         }
         
@@ -835,6 +864,7 @@
                 // 更新显示
                 updateFileNameDisplay();
                 updateSheetNameDisplay();
+                updateProgressDisplay();
                 
                 if (emailData.length > 0) {
                     renderTable();
@@ -1030,6 +1060,7 @@
                     renderTable();
                     saveProgress();
                     updateUI();
+                    updateProgressDisplay();
                     scrollToCurrentRow();
                     showMessage('success', `成功加载 ${emailData.length} 条数据`);
                     document.getElementById('copyButton').disabled = false;
@@ -1077,6 +1108,7 @@
                             
                             saveProgress();
                             updateUI();
+                            updateProgressDisplay();
                             scrollToCurrentRow();
                             updateHistoryDisplay();
                             
@@ -1101,6 +1133,7 @@
                         // 更新显示
                         updateFileNameDisplay();
                         updateSheetNameDisplay();
+                        updateProgressDisplay();
                         
                         saveProgress();
                         updateUI();
@@ -1260,6 +1293,7 @@
             // 更新界面
             renderTable();
             updateUI();
+            updateProgressDisplay();
             scrollToCurrentRow();
             updateHistoryDisplay();
             updateClipboardStatus(currentEmail);
@@ -1328,6 +1362,7 @@
                 copyHistory = [];
                 saveProgress();
                 updateUI();
+                updateProgressDisplay();
                 updateHistoryDisplay();
                 document.getElementById('clipboardStatus').style.display = 'none';
                 renderTable();
@@ -1379,6 +1414,7 @@
         window.onload = async function() {
             updateFileNameDisplay(); // 初始化显示文件名
             updateSheetNameDisplay(); // 初始化显示Sheet名称
+            updateProgressDisplay(); // 初始化显示进度
             await initDB();
             loadSettings();
             loadProgress();
