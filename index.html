@@ -32,7 +32,7 @@
             position: relative;
         }
         
-        /* 顶部复制按钮样式 - 高度变为4倍 */
+        /* 顶部复制按钮样式 */
         .top-copy-button {
             position: fixed;
             top: 15px;
@@ -102,7 +102,7 @@
             white-space: nowrap;
         }
         
-        .progress-display {
+        .last-copied-display {
             font-size: 15px;
             margin-top: 12px;
             padding: 6px 15px;
@@ -533,7 +533,7 @@
                 font-size: 14px;
             }
             
-            .progress-display {
+            .last-copied-display {
                 font-size: 14px;
             }
             
@@ -574,12 +574,12 @@
     </style>
 </head>
 <body>
-    <!-- 顶部复制按钮 - 添加进度显示 -->
+    <!-- 顶部复制按钮 - 显示上一个复制的序号 -->
     <button id="copyButton" class="top-copy-button" disabled>
         <div id="copyStatusText" class="copy-status-text">复制当前邮箱</div>
         <div id="fileNameDisplay" class="file-name-display">【未选择文件】</div>
         <div id="sheetNameDisplay" class="sheet-name-display">【未选择Sheet】</div>
-        <div id="progressDisplay" class="progress-display">当前：第 0 个 / 共 0 个</div>
+        <div id="lastCopiedDisplay" class="last-copied-display">上一个复制：尚未开始</div>
     </button>
 
     <div class="container">
@@ -680,6 +680,7 @@
             autoSave: true,
             callShortcut: true
         };
+        let lastCopiedIndex = -1; // 上一个复制的序号
         
         // 更新文件名显示
         function updateFileNameDisplay() {
@@ -708,17 +709,16 @@
             }
         }
         
-        // 更新进度显示
-        function updateProgressDisplay() {
-            const progressElement = document.getElementById('progressDisplay');
-            const total = emailData.length;
-            const current = currentIndex;
+        // 更新上一个复制序号显示
+        function updateLastCopiedDisplay() {
+            const displayElement = document.getElementById('lastCopiedDisplay');
             
-            if (total > 0) {
-                progressElement.textContent = `当前：第 ${current + 1} 个 / 共 ${total} 个`;
-                progressElement.style.display = 'block';
+            if (lastCopiedIndex >= 0) {
+                displayElement.textContent = `上一个复制：第 ${lastCopiedIndex + 1} 个`;
+            } else if (emailData.length > 0) {
+                displayElement.textContent = '上一个复制：尚未开始';
             } else {
-                progressElement.textContent = '当前：第 0 个 / 共 0 个';
+                displayElement.textContent = '上一个复制：尚未开始';
             }
         }
         
@@ -781,6 +781,7 @@
                 copyHistory: copyHistory,
                 currentSheetName: currentSheetName,
                 currentFileName: currentFileName,
+                lastCopiedIndex: lastCopiedIndex,
                 timestamp: new Date().toISOString()
             };
             
@@ -860,11 +861,12 @@
                 copyHistory = data.copyHistory || [];
                 currentSheetName = data.currentSheetName || '';
                 currentFileName = data.currentFileName || '';
+                lastCopiedIndex = data.lastCopiedIndex || -1;
                 
                 // 更新显示
                 updateFileNameDisplay();
                 updateSheetNameDisplay();
-                updateProgressDisplay();
+                updateLastCopiedDisplay();
                 
                 if (emailData.length > 0) {
                     renderTable();
@@ -1037,30 +1039,35 @@
                                 if (verifyDataMatch(emailData, progressData.emailData)) {
                                     currentIndex = progressData.currentIndex || 0;
                                     copyHistory = progressData.copyHistory || [];
+                                    lastCopiedIndex = progressData.lastCopiedIndex || -1;
                                     showMessage('success', `已恢复进度，继续从第 ${currentIndex + 1} 个开始`);
                                 } else {
                                     showMessage('warning', '数据不匹配，将重新开始');
                                     currentIndex = 0;
                                     copyHistory = [];
+                                    lastCopiedIndex = -1;
                                 }
                             } else {
                                 currentIndex = 0;
                                 copyHistory = [];
+                                lastCopiedIndex = -1;
                             }
                         } else {
                             currentIndex = 0;
                             copyHistory = [];
+                            lastCopiedIndex = -1;
                         }
                     } else {
                         currentIndex = 0;
                         copyHistory = [];
+                        lastCopiedIndex = -1;
                     }
                     
                     // 渲染表格并保存
                     renderTable();
                     saveProgress();
                     updateUI();
-                    updateProgressDisplay();
+                    updateLastCopiedDisplay();
                     scrollToCurrentRow();
                     showMessage('success', `成功加载 ${emailData.length} 条数据`);
                     document.getElementById('copyButton').disabled = false;
@@ -1105,10 +1112,11 @@
                             
                             currentIndex = data.currentIndex || 0;
                             copyHistory = data.copyHistory || [];
+                            lastCopiedIndex = data.lastCopiedIndex || -1;
                             
                             saveProgress();
                             updateUI();
-                            updateProgressDisplay();
+                            updateLastCopiedDisplay();
                             scrollToCurrentRow();
                             updateHistoryDisplay();
                             
@@ -1129,11 +1137,12 @@
                         copyHistory = data.copyHistory || [];
                         currentSheetName = data.currentSheetName || '';
                         currentFileName = data.currentFileName || '';
+                        lastCopiedIndex = data.lastCopiedIndex || -1;
                         
                         // 更新显示
                         updateFileNameDisplay();
                         updateSheetNameDisplay();
-                        updateProgressDisplay();
+                        updateLastCopiedDisplay();
                         
                         saveProgress();
                         updateUI();
@@ -1264,6 +1273,7 @@
         // 处理复制成功
         function handleCopySuccess(currentEmail) {
             lastCopiedEmail = currentEmail.email;
+            lastCopiedIndex = currentIndex; // 记录上一个复制的序号
             
             // 获取当前时间（含时分秒）
             const now = new Date();
@@ -1293,7 +1303,7 @@
             // 更新界面
             renderTable();
             updateUI();
-            updateProgressDisplay();
+            updateLastCopiedDisplay();
             scrollToCurrentRow();
             updateHistoryDisplay();
             updateClipboardStatus(currentEmail);
@@ -1360,9 +1370,10 @@
             if (confirm('确定要重新开始吗？这将清除当前进度。')) {
                 currentIndex = 0;
                 copyHistory = [];
+                lastCopiedIndex = -1;
                 saveProgress();
                 updateUI();
-                updateProgressDisplay();
+                updateLastCopiedDisplay();
                 updateHistoryDisplay();
                 document.getElementById('clipboardStatus').style.display = 'none';
                 renderTable();
@@ -1414,7 +1425,7 @@
         window.onload = async function() {
             updateFileNameDisplay(); // 初始化显示文件名
             updateSheetNameDisplay(); // 初始化显示Sheet名称
-            updateProgressDisplay(); // 初始化显示进度
+            updateLastCopiedDisplay(); // 初始化显示上一个复制序号
             await initDB();
             loadSettings();
             loadProgress();
