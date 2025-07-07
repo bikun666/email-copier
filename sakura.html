@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mac文本编辑器 - 网页版さくらエディター</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            overflow: hidden;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            height: 95vh;
+            background: rgba(30, 30, 46, 0.8);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        header {
+            background: rgba(25, 25, 40, 0.95);
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            font-size: 24px;
+            color: #7e57c2;
+        }
+        
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 600;
+            background: linear-gradient(90deg, #bb86fc, #7e57c2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(100, 100, 150, 0.3);
+            color: #e0e0e0;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn:hover {
+            background: rgba(126, 87, 194, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn i {
+            font-size: 16px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 280px;
+            background: rgba(30, 30, 50, 0.8);
+            padding: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.08);
+            overflow-y: auto;
+        }
+        
+        .sidebar-section {
+            margin-bottom: 30px;
+        }
+        
+        .sidebar-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #bb86fc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .sidebar-section h2 i {
+            font-size: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #a0a0c0;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(40, 40, 60, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #7e57c2;
+            box-shadow: 0 0 0 2px rgba(126, 87, 194, 0.3);
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .checkbox-group input {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .editor-header {
+            padding: 12px 20px;
+            background: rgba(35, 35, 55, 0.8);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .tab {
+            padding: 8px 16px;
+            background: rgba(60, 60, 90, 0.5);
+            border-radius: 6px 6px 0 0;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: none;
+        }
+        
+        .tab.active {
+            background: rgba(80, 80, 120, 0.7);
+            color: #bb86fc;
+        }
+        
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .editor-actions .btn {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .editor-wrapper {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #editor {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .status-bar {
+            padding: 8px 20px;
+            background: rgba(25, 25, 40, 0.95);
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #a0a0c0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            color: #7e7ea0;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .footer a {
+            color: #bb86fc;
+            text-decoration: none;
+        }
+        
+        .find-replace-dialog {
+            position: absolute;
+            top: 50px;
+            right: 30px;
+            background: rgba(35, 35, 55, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            width: 400px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            transform: translateY(-10px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+        
+        .find-replace-dialog.active {
+            transform: translateY(0);
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .dialog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .dialog-header h3 {
+            font-size: 18px;
+            color: #bb86fc;
+        }
+        
+        .close-dialog {
+            background: none;
+            border: none;
+            color: #a0a0c0;
+            font-size: 20px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .close-dialog:hover {
+            color: #ff5555;
+        }
+        
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .dialog-actions .btn {
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .highlight {
+            background: rgba(187, 134, 252, 0.3);
+            border: 1px solid #bb86fc;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(30, 30, 50, 0.5);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100, 100, 150, 0.5);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(126, 87, 194, 0.7);
+        }
+        
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 220px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                max-height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-cherry logo-icon"></i>
+                <h1>Web版 さくらエディター</h1>
+            </div>
+            <div class="controls">
+                <button class="btn" id="new-file">
+                    <i class="fas fa-file"></i> 新規作成
+                </button>
+                <button class="btn" id="open-file">
+                    <i class="fas fa-folder-open"></i> 開く
+                </button>
+                <button class="btn" id="save-file">
+                    <i class="fas fa-save"></i> 保存
+                </button>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h2><i class="fas fa-search"></i> 検索と置換</h2>
+                    <div class="form-group">
+                        <label for="find-text">検索:</label>
+                        <input type="text" id="find-text" class="form-control" placeholder="検索するテキスト...">
+                    </div>
+                    <div class="form-group">
+                        <label for="replace-text">置換:</label>
+                        <input type="text" id="replace-text" class="form-control" placeholder="置換するテキスト...">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="regex-checkbox">
+                        <label for="regex-checkbox">正規表現を使用</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="case-sensitive">
+                        <label for="case-sensitive">大文字小文字を区別</label>
+                    </div>
+                    <div class="form-group" style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button class="btn" id="find-btn" style="flex: 1;">
+                            <i class="fas fa-search"></i> 検索
+                        </button>
+                        <button class="btn" id="replace-btn" style="flex: 1;">
+                            <i class="fas fa-exchange-alt"></i> 置換
+                        </button>
+                        <button class="btn" id="replace-all-btn" style="flex: 1;">
+                            <i class="fas fa-sync-alt"></i> 全て置換
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h2><i class="fas fa-code"></i> エディター設定</h2>
+                    <div class="form-group">
+                        <label for="theme-select">テーマ:</label>
+                        <select id="theme-select" class="form-control">
+                            <option value="default">デフォルト</option>
+                            <option value="dracula">Dracula</option>
+                            <option value="eclipse">Eclipse</option>
+                            <option value="material">Material</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="font-size">フォントサイズ:</label>
+                        <input type="range" id="font-size" class="form-control" min="10" max="24" value="14">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="line-numbers" checked>
+                        <label for="line-numbers">行番号を表示</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="word-wrap">
+                        <label for="word-wrap">ワードラップ</label>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h2><i class="fas fa-file-alt"></i> ドキュメント情報</h2>
+                    <div class="form-group">
+                        <label>文字数: <span id="char-count">0</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label>行数: <span id="line-count">1</span></label>
+                    </div>
+                    <div class="form-group">
+                        <label>ファイルタイプ: <span id="file-type">テキスト</span></label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-container">
+                <div class="editor-header">
+                    <div class="tabs">
+                        <div class="tab active">無題.txt</div>
+                        <div class="tab">ドキュメント.md</div>
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn" id="show-find">
+                            <i class="fas fa-search"></i> 検索
+                        </button>
+                        <button class="btn">
+                            <i class="fas fa-undo"></i>
+                        </button>
+                        <button class="btn">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="editor-wrapper">
+                    <textarea id="editor"># さくらエディター - Web版
+
+ようこそ！このエディターはMacユーザー向けに設計された、さくらエディター風のウェブベーステキストエディターです。
+
+## 主な機能
+
+- 正規表現を使った高度な検索・置換
+- 複数ファイルのタブ編集
+- シンタックスハイライト（複数言語対応）
+- テーマのカスタマイズ
+- ファイル操作（新規作成、開く、保存）
+- リアルタイムドキュメント統計
+
+## 正規表現の使用例
+
+1. メールアドレスの検索:
+   pattern: \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b
+
+2. HTMLタグの置換:
+   pattern: <[^>]+>
+   replace: [タグ削除]
+
+3. 日付の検索 (YYYY-MM-DD):
+   pattern: \d{4}-\d{2}-\d{2}
+
+## サンプルコード (JavaScript)
+
+function calculateSum(a, b) {
+  // 2つの数値の合計を返す
+  return a + b;
+}
+
+const result = calculateSum(5, 7);
+console.log(`計算結果: ${result}`);
+
+## 利用可能なショートカット
+
+- Cmd + F: 検索
+- Cmd + H: 置換
+- Cmd + S: 保存
+- Cmd + O: ファイルを開く
+- Cmd + N: 新規ファイル
+
+このエディターを自由にお使いください。ご意見・ご要望があればお知らせください！
+</textarea>
+                </div>
+                
+                <div class="status-bar">
+                    <div class="status-item">
+                        <i class="fas fa-code"></i>
+                        <span>プレーンテキスト</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-keyboard"></i>
+                        <span>UTF-8</span>
+                    </div>
+                    <div class="status-item">
+                        <i class="fas fa-expand-arrows-alt"></i>
+                        <span>行: 1, 列: 1</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Macユーザー向けに開発されたウェブベーステキストエディター | <a href="#" id="toggle-help">ヘルプを表示</a></p>
+        </div>
+        
+        <div class="find-replace-dialog" id="find-replace-dialog">
+            <div class="dialog-header">
+                <h3>検索と置換</h3>
+                <button class="close-dialog" id="close-dialog">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="dialog-find">検索:</label>
+                <input type="text" id="dialog-find" class="form-control" placeholder="検索するテキスト...">
+            </div>
+            <div class="form-group">
+                <label for="dialog-replace">置換:</label>
+                <input type="text" id="dialog-replace" class="form-control" placeholder="置換するテキスト...">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="dialog-regex">
+                <label for="dialog-regex">正規表現を使用</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="dialog-case">
+                <label for="dialog-case">大文字小文字を区別</label>
+            </div>
+            <div class="dialog-actions">
+                <button class="btn" id="dialog-find-btn">
+                    <i class="fas fa-search"></i> 検索
+                </button>
+                <button class="btn" id="dialog-replace-btn">
+                    <i class="fas fa-exchange-alt"></i> 置換
+                </button>
+                <button class="btn" id="dialog-replace-all-btn">
+                    <i class="fas fa-sync-alt"></i> 全て置換
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/clike/clike.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/shell/shell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/markdown/markdown.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/search.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/search/searchcursor.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/dialog/dialog.min.css">
+    
+    <script>
+        // エディターの初期化
+        const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+            lineNumbers: true,
+            mode: 'text/plain',
+            theme: 'default',
+            lineWrapping: false,
+            indentUnit: 4,
+            tabSize: 4,
+            autoCloseBrackets: true,
+            matchBrackets: true,
+            extraKeys: {
+                'Cmd-F': function(cm) {
+                    document.getElementById('show-find').click();
+                },
+                'Ctrl-F': function(cm) {
+                    document.getElementById('show-find').click();
+                }
+            }
+        });
+        
+        // エディター設定
+        const themeSelect = document.getElementById('theme-select');
+        const fontSize = document.getElementById('font-size');
+        const lineNumbers = document.getElementById('line-numbers');
+        const wordWrap = document.getElementById('word-wrap');
+        
+        themeSelect.addEventListener('change', () => {
+            editor.setOption('theme', themeSelect.value);
+        });
+        
+        fontSize.addEventListener('input', () => {
+            document.getElementById('editor').parentElement.style.fontSize = fontSize.value + 'px';
+            editor.refresh();
+        });
+        
+        lineNumbers.addEventListener('change', () => {
+            editor.setOption('lineNumbers', lineNumbers.checked);
+        });
+        
+        wordWrap.addEventListener('change', () => {
+            editor.setOption('lineWrapping', wordWrap.checked);
+        });
+        
+        // 文字数と行数の更新
+        function updateStats() {
+            const content = editor.getValue();
+            const charCount = content.length;
+            const lineCount = editor.lineCount();
+            
+            document.getElementById('char-count').textContent = charCount.toLocaleString();
+            document.getElementById('line-count').textContent = lineCount.toLocaleString();
+            
+            // カーソル位置の更新
+            const cursor = editor.getCursor();
+            document.querySelector('.status-item:last-child span').textContent = 
+                `行: ${cursor.line + 1}, 列: ${cursor.ch + 1}`;
+        }
+        
+        editor.on('change', updateStats);
+        editor.on('cursorActivity', updateStats);
+        updateStats();
+        
+        // 検索・置換機能
+        const findText = document.getElementById('find-text');
+        const replaceText = document.getElementById('replace-text');
+        const regexCheckbox = document.getElementById('regex-checkbox');
+        const caseSensitive = document.getElementById('case-sensitive');
+        const findBtn = document.getElementById('find-btn');
+        const replaceBtn = document.getElementById('replace-btn');
+        const replaceAllBtn = document.getElementById('replace-all-btn');
+        
+        function performFind() {
+            const query = findText.value;
+            if (!query) return;
+            
+            const regex = regexCheckbox.checked;
+            const caseSens = caseSensitive.checked;
+            let searchQuery = regex ? new RegExp(query, caseSens ? 'g' : 'gi') : query;
+            
+            editor.operation(() => {
+                editor.setSelection(editor.getCursor());
+                let cursor = editor.getSearchCursor(searchQuery, editor.getCursor());
+                
+                if (cursor.findNext()) {
+                    editor.setSelection(cursor.from(), cursor.to());
+                    editor.scrollIntoView(cursor.from());
+                } else {
+                    // 最初から再検索
+                    cursor = editor.getSearchCursor(searchQuery, {line:0, ch:0});
+                    if (cursor.findNext()) {
+                        editor.setSelection(cursor.from(), cursor.to());
+                        editor.scrollIntoView(cursor.from());
+                    } else {
+                        alert('検索結果が見つかりませんでした');
+                    }
+                }
+            });
+        }
+        
+        function performReplace() {
+            const query = findText.value;
+            const replacement = replaceText.value;
+            if (!query) return;
+            
+            const regex = regexCheckbox.checked;
+            const caseSens = caseSensitive.checked;
+            let searchQuery = regex ? new RegExp(query, caseSens ? 'g' : 'gi') : query;
+            
+            editor.operation(() => {
+                let cursor = editor.getSearchCursor(searchQuery, editor.getCursor());
+                
+                if (cursor.findNext()) {
+                    cursor.replace(replacement);
+                    editor.setSelection(cursor.from(), cursor.to());
+                    editor.scrollIntoView(cursor.from());
+                } else {
+                    alert('置換対象が見つかりませんでした');
+                }
+            });
+        }
+        
+        function performReplaceAll() {
+            const query = findText.value;
+            const replacement = replaceText.value;
+            if (!query) return;
+            
+            const regex = regexCheckbox.checked;
+            const caseSens = caseSensitive.checked;
+            let searchQuery = regex ? new RegExp(query, caseSens ? 'g' : 'gi') : query;
+            
+            editor.operation(() => {
+                let cursor = editor.getSearchCursor(searchQuery, {line:0, ch:0});
+                let count = 0;
+                
+                while (cursor.findNext()) {
+                    cursor.replace(replacement);
+                    count++;
+                }
+                
+                if (count === 0) {
+                    alert('置換対象が見つかりませんでした');
+                } else {
+                    alert(`${count} 箇所を置換しました`);
+                }
+            });
+        }
+        
+        findBtn.addEventListener('click', performFind);
+        replaceBtn.addEventListener('click', performReplace);
+        replaceAllBtn.addEventListener('click', performReplaceAll);
+        
+        // ファイル操作
+        document.getElementById('new-file').addEventListener('click', () => {
+            if (confirm('現在の内容を破棄して新規ファイルを作成しますか？')) {
+                editor.setValue('');
+                document.querySelector('.tab.active').textContent = '無題.txt';
+                updateStats();
+            }
+        });
+        
+        document.getElementById('save-file').addEventListener('click', () => {
+            const content = editor.getValue();
+            const blob = new Blob([content], {type: 'text/plain'});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.querySelector('.tab.active').textContent;
+            document.body.appendChild(a);
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }, 0);
+        });
+        
+        document.getElementById('open-file').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.txt,.md,.js,.html,.css,.py,.java';
+            
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = e => {
+                    editor.setValue(e.target.result);
+                    document.querySelector('.tab.active').textContent = file.name;
+                    
+                    // ファイルタイプに基づいてモードを設定
+                    const ext = file.name.split('.').pop().toLowerCase();
+                    const modes = {
+                        'js': 'javascript',
+                        'html': 'htmlmixed',
+                        'css': 'css',
+                        'md': 'markdown',
+                        'py': 'python',
+                        'java': 'text/x-java'
+                    };
+                    
+                    editor.setOption('mode', modes[ext] || 'text/plain');
+                    document.querySelector('.status-item:first-child span').textContent = 
+                        modes[ext] ? modes[ext] : 'プレーンテキスト';
+                    
+                    updateStats();
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        });
+        
+        // 検索ダイアログ
+        const findDialog = document.getElementById('find-replace-dialog');
+        const showFindBtn = document.getElementById('show-find');
+        const closeDialogBtn = document.getElementById('close-dialog');
+        
+        showFindBtn.addEventListener('click', () => {
+            findDialog.classList.add('active');
+            document.getElementById('dialog-find').focus();
+        });
+        
+        closeDialogBtn.addEventListener('click', () => {
+            findDialog.classList.remove('active');
+        });
+        
+        // ダイアログ内の検索・置換機能
+        document.getElementById('dialog-find-btn').addEventListener('click', () => {
+            findText.value = document.getElementById('dialog-find').value;
+            performFind();
+            findDialog.classList.remove('active');
+        });
+        
+        document.getElementById('dialog-replace-btn').addEventListener('click', () => {
+            findText.value = document.getElementById('dialog-find').value;
+            replaceText.value = document.getElementById('dialog-replace').value;
+            performReplace();
+        });
+        
+        document.getElementById('dialog-replace-all-btn').addEventListener('click', () => {
+            findText.value = document.getElementById('dialog-find').value;
+            replaceText.value = document.getElementById('dialog-replace').value;
+            performReplaceAll();
+        });
+        
+        // タブ切り替え
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+            });
+        });
+        
+        // 初期設定
+        themeSelect.value = 'default';
+        fontSize.value = 14;
+    </script>
+</body>
+</html>
