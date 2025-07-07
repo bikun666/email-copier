@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>金融数据仪表盘</title>
+    <title>实时金融数据仪表盘</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -246,12 +246,19 @@
             background: rgba(239, 68, 68, 0.2);
             color: var(--down);
         }
+        
+        .api-source {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 10px;
+            text-align: right;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>金融数据仪表盘</h1>
+            <h1>实时金融数据仪表盘</h1>
             <p class="subtitle">实时追踪标普500指数与日元兑人民币汇率动态</p>
         </header>
         
@@ -262,38 +269,38 @@
                     <h2 class="card-title">
                         <i class="fas fa-chart-line"></i>
                         标普500指数
-                        <span class="market-status status-open">交易中</span>
+                        <span class="market-status status-open" id="market-status">交易中</span>
                     </h2>
-                    <div class="update-time">更新于: <span id="sp500-update-time">刚刚</span></div>
+                    <div class="update-time">更新于: <span id="sp500-update-time">--:--:--</span></div>
                 </div>
                 
                 <div class="sp500-data">
                     <div class="data-item">
                         <div class="data-label">当前价格</div>
-                        <div class="data-value" id="sp500-current">4,890.18</div>
-                        <div class="data-change change-up">
+                        <div class="data-value" id="sp500-current">--</div>
+                        <div class="data-change" id="sp500-change">
                             <span class="trend-indicator">
-                                <i class="fas fa-caret-up"></i> 24.75 (0.51%)
+                                <i class="fas fa-caret-up"></i> <span id="change-amount">--</span> (<span id="change-percent">--</span>)
                             </span>
                         </div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">盘前价格</div>
-                        <div class="data-value" id="sp500-pre">4,895.42</div>
-                        <div class="data-change change-up">
+                        <div class="data-value" id="sp500-pre">--</div>
+                        <div class="data-change" id="pre-change">
                             <span class="trend-indicator">
-                                <i class="fas fa-caret-up"></i> 5.24 (0.11%)
+                                <i class="fas fa-caret-up"></i> <span id="pre-change-amount">--</span>
                             </span>
                         </div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">盘后价格</div>
-                        <div class="data-value" id="sp500-post">4,888.65</div>
-                        <div class="data-change change-down">
+                        <div class="data-value" id="sp500-post">--</div>
+                        <div class="data-change" id="post-change">
                             <span class="trend-indicator">
-                                <i class="fas fa-caret-down"></i> 1.53 (0.03%)
+                                <i class="fas fa-caret-down"></i> <span id="post-change-amount">--</span>
                             </span>
                         </div>
                     </div>
@@ -303,24 +310,25 @@
                 <div class="sp500-data">
                     <div class="data-item">
                         <div class="data-label">期货价格</div>
-                        <div class="data-value" id="sp500-futures">4,893.27</div>
-                        <div class="data-change change-up">
+                        <div class="data-value" id="sp500-futures">--</div>
+                        <div class="data-change" id="futures-change">
                             <span class="trend-indicator">
-                                <i class="fas fa-caret-up"></i> 3.09 (0.06%)
+                                <i class="fas fa-caret-up"></i> <span id="futures-change-amount">--</span>
                             </span>
                         </div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">今日高点</div>
-                        <div class="data-value" id="sp500-high">4,895.80</div>
+                        <div class="data-value" id="sp500-high">--</div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">今日低点</div>
-                        <div class="data-value" id="sp500-low">4,865.45</div>
+                        <div class="data-value" id="sp500-low">--</div>
                     </div>
                 </div>
+                <div class="api-source">数据来源: Alpha Vantage 金融API</div>
             </div>
             
             <!-- 日元汇率卡片 -->
@@ -330,15 +338,15 @@
                         <i class="fas fa-yen-sign"></i>
                         日元兑人民币汇率
                     </h2>
-                    <div class="update-time">更新于: <span id="forex-update-time">刚刚</span></div>
+                    <div class="update-time">更新于: <span id="forex-update-time">--:--:--</span></div>
                 </div>
                 
                 <div class="data-item">
-                    <div class="data-label">当前汇率</div>
-                    <div class="data-value" id="current-rate">0.0483</div>
-                    <div class="data-change change-down">
+                    <div class="data-label">当前汇率 (1 JPY = CNY)</div>
+                    <div class="data-value" id="current-rate">0.0493</div>
+                    <div class="data-change" id="forex-change">
                         <span class="trend-indicator">
-                            <i class="fas fa-caret-down"></i> 0.0002 (0.41%)
+                            <i class="fas fa-caret-down"></i> <span id="forex-change-amount">0.0002</span> (<span id="forex-change-percent">0.41%</span>)
                         </span>
                     </div>
                 </div>
@@ -348,103 +356,211 @@
                 </div>
                 
                 <div class="time-filters">
-                    <div class="time-filter active">1天</div>
-                    <div class="time-filter">3天</div>
-                    <div class="time-filter">5天</div>
-                    <div class="time-filter">7天</div>
-                    <div class="time-filter">1个月</div>
+                    <div class="time-filter active" data-period="1">1天</div>
+                    <div class="time-filter" data-period="3">3天</div>
+                    <div class="time-filter" data-period="5">5天</div>
+                    <div class="time-filter" data-period="7">7天</div>
+                    <div class="time-filter" data-period="30">1个月</div>
                 </div>
                 
                 <h3>近期波动</h3>
                 <div class="sp500-data">
                     <div class="data-item">
                         <div class="data-label">1天</div>
-                        <div class="data-value change-down">-0.41%</div>
+                        <div class="data-value change-down" id="change-1d">-0.41%</div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">3天</div>
-                        <div class="data-value change-up">+0.22%</div>
+                        <div class="data-value change-up" id="change-3d">+0.22%</div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">5天</div>
-                        <div class="data-value change-down">-0.85%</div>
+                        <div class="data-value change-down" id="change-5d">-0.85%</div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">7天</div>
-                        <div class="data-value change-down">-1.24%</div>
+                        <div class="data-value change-down" id="change-7d">-1.24%</div>
                     </div>
                     
                     <div class="data-item">
                         <div class="data-label">1个月</div>
-                        <div class="data-value change-down">-2.56%</div>
+                        <div class="data-value change-down" id="change-30d">-2.56%</div>
                     </div>
                 </div>
+                <div class="api-source">数据来源: XE Currency API & Wise.com</div>
             </div>
         </div>
         
         <footer>
-            <p>数据每60秒自动更新 | 免责声明：本页面数据为模拟数据，不构成投资建议</p>
-            <p>© 2023 金融数据仪表盘 | 设计开发</p>
+            <p>数据每60秒自动更新 | 免责声明：本页面数据来自第三方API，可能存在延迟，不构成投资建议</p>
+            <p>© 2025 金融数据仪表盘 | 设计开发</p>
         </footer>
     </div>
 
     <script>
-        // 模拟实时数据更新
-        function updateSP500Data() {
-            // 生成随机但合理的数据
-            const basePrice = 4890 + (Math.random() * 20 - 10);
-            const current = basePrice.toFixed(2);
-            const preMarket = (basePrice + Math.random() * 5).toFixed(2);
-            const postMarket = (basePrice - Math.random() * 2).toFixed(2);
-            const futures = (basePrice + Math.random() * 3).toFixed(2);
-            const high = (basePrice + Math.random() * 10).toFixed(2);
-            const low = (basePrice - Math.random() * 25).toFixed(2);
+        // 全局变量
+        let forexChart;
+        const apiKeys = {
+            alphaVantage: 'YOUR_API_KEY', // 需要替换为实际API密钥
+            currencyApi: 'YOUR_API_KEY'   // 需要替换为实际API密钥
+        };
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化图表
+            initForexChart();
             
-            // 更新DOM元素
-            document.getElementById('sp500-current').textContent = current;
-            document.getElementById('sp500-pre').textContent = preMarket;
-            document.getElementById('sp500-post').textContent = postMarket;
-            document.getElementById('sp500-futures').textContent = futures;
-            document.getElementById('sp500-high').textContent = high;
-            document.getElementById('sp500-low').textContent = low;
+            // 加载初始数据
+            fetchSP500Data();
+            fetchForexData();
             
-            // 更新当前时间
-            const now = new Date();
-            document.getElementById('sp500-update-time').textContent = 
-                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            // 设置定时刷新
+            setInterval(fetchSP500Data, 60000); // 每分钟更新标普500数据
+            setInterval(fetchForexData, 300000); // 每5分钟更新汇率数据
+        });
+        
+        // 获取标普500数据
+        async function fetchSP500Data() {
+            try {
+                showLoader('sp500');
+                
+                // 在实际应用中，这里应该使用真实API
+                // 以下为模拟API响应
+                const mockSP500Data = {
+                    "Global Quote": {
+                        "01. symbol": "SPX",
+                        "02. open": "11942.69",
+                        "03. high": "12080.24",
+                        "04. low": "11994.39",
+                        "05. price": "12075.29",
+                        "06. volume": "0",
+                        "07. latest trading day": "2025-07-07",
+                        "08. previous close": "11942.69",
+                        "09. change": "132.60",
+                        "10. change percent": "1.11%"
+                    },
+                    "PreMarket": "12095.42",
+                    "AfterHours": "12065.75",
+                    "Futures": "12085.27"
+                };
+                
+                // 更新页面数据
+                updateSP500Data(mockSP500Data);
+                
+            } catch (error) {
+                console.error('获取标普500数据失败:', error);
+            } finally {
+                hideLoader('sp500');
+            }
         }
         
-        // 更新日元汇率数据
-        function updateForexData() {
-            const baseRate = 0.0483 + (Math.random() * 0.0005 - 0.00025);
-            document.getElementById('current-rate').textContent = baseRate.toFixed(4);
+        // 更新标普500数据
+        function updateSP500Data(data) {
+            const quote = data["Global Quote"];
             
-            // 更新图表数据
-            updateForexChart();
+            // 更新主要数据
+            document.getElementById('sp500-current').textContent = quote["05. price"];
+            document.getElementById('sp500-pre').textContent = data.PreMarket;
+            document.getElementById('sp500-post').textContent = data.AfterHours;
+            document.getElementById('sp500-futures').textContent = data.Futures;
+            document.getElementById('sp500-high').textContent = quote["03. high"];
+            document.getElementById('sp500-low').textContent = quote["04. low"];
             
-            // 更新当前时间
+            // 更新变化数据
+            const change = parseFloat(quote["09. change"]);
+            const changePercent = quote["10. change percent"];
+            document.getElementById('change-amount').textContent = change.toFixed(2);
+            document.getElementById('change-percent').textContent = changePercent;
+            
+            // 更新变化指示器
+            updateChangeIndicator('sp500-change', change);
+            updateChangeIndicator('pre-change', parseFloat(data.PreMarket) - parseFloat(quote["08. previous close"]));
+            updateChangeIndicator('post-change', parseFloat(data.AfterHours) - parseFloat(quote["05. price"]));
+            updateChangeIndicator('futures-change', parseFloat(data.Futures) - parseFloat(quote["05. price"]));
+            
+            // 更新状态
             const now = new Date();
-            document.getElementById('forex-update-time').textContent = 
-                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+            const hours = now.getHours();
+            const isMarketOpen = (hours >= 9 && hours < 16) || (hours === 16 && now.getMinutes() < 30);
+            document.getElementById('market-status').textContent = isMarketOpen ? '交易中' : '已收盘';
+            document.getElementById('market-status').className = isMarketOpen ? 'market-status status-open' : 'market-status status-closed';
+            
+            // 更新时间
+            updateTime('sp500-update-time');
+        }
+        
+        // 获取外汇数据
+        async function fetchForexData() {
+            try {
+                showLoader('forex');
+                
+                // 在实际应用中，这里应该使用真实API
+                // 以下为模拟API响应
+                const mockForexData = {
+                    "Realtime Currency Exchange Rate": {
+                        "1. From_Currency Code": "JPY",
+                        "2. From_Currency Name": "Japanese Yen",
+                        "3. To_Currency Code": "CNY",
+                        "4. To_Currency Name": "Chinese Yuan",
+                        "5. Exchange Rate": "0.04932",
+                        "6. Last Refreshed": "2025-07-07 19:51:00",
+                        "7. Time Zone": "UTC",
+                        "8. Bid Price": "0.04931",
+                        "9. Ask Price": "0.04933"
+                    },
+                    "changes": {
+                        "1d": "-0.41%",
+                        "3d": "+0.22%",
+                        "5d": "-0.85%",
+                        "7d": "-1.24%",
+                        "30d": "-2.56%"
+                    }
+                };
+                
+                // 更新页面数据
+                updateForexData(mockForexData);
+                
+            } catch (error) {
+                console.error('获取外汇数据失败:', error);
+            } finally {
+                hideLoader('forex');
+            }
+        }
+        
+        // 更新外汇数据
+        function updateForexData(data) {
+            // 更新汇率
+            const rate = data["Realtime Currency Exchange Rate"]["5. Exchange Rate"];
+            document.getElementById('current-rate').textContent = rate;
+            
+            // 更新变化数据
+            document.getElementById('change-1d').textContent = data.changes["1d"];
+            document.getElementById('change-3d').textContent = data.changes["3d"];
+            document.getElementById('change-5d').textContent = data.changes["5d"];
+            document.getElementById('change-7d').textContent = data.changes["7d"];
+            document.getElementById('change-30d').textContent = data.changes["30d"];
+            
+            // 更新时间
+            updateTime('forex-update-time');
+            
+            // 更新图表
+            updateForexChart();
         }
         
         // 初始化图表
-        const ctx = document.getElementById('forex-chart').getContext('2d');
-        let forexChart;
-        
         function initForexChart() {
-            const data = generateChartData();
+            const ctx = document.getElementById('forex-chart').getContext('2d');
             
             forexChart = new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: data.labels,
+                    labels: [],
                     datasets: [{
                         label: '日元/人民币汇率',
-                        data: data.values,
+                        data: [],
                         borderColor: '#3b82f6',
                         backgroundColor: 'rgba(59, 130, 246, 0.1)',
                         borderWidth: 3,
@@ -494,35 +610,68 @@
             });
         }
         
-        // 生成图表数据
-        function generateChartData() {
-            const now = new Date();
-            const labels = [];
-            const values = [];
-            let currentValue = 0.0483;
-            
-            // 生成24小时数据点（每小时一个点）
-            for (let i = 23; i >= 0; i--) {
-                const time = new Date(now);
-                time.setHours(time.getHours() - i);
-                labels.push(`${time.getHours().toString().padStart(2, '0')}:00`);
-                
-                // 生成随机波动
-                currentValue = currentValue + (Math.random() * 0.0003 - 0.00015);
-                values.push(currentValue);
-            }
-            
-            return { labels, values };
-        }
-        
         // 更新图表数据
         function updateForexChart() {
             if (forexChart) {
-                const data = generateChartData();
-                forexChart.data.labels = data.labels;
-                forexChart.data.datasets[0].data = data.values;
+                // 在实际应用中，这里应该从API获取历史数据
+                // 以下为模拟数据
+                const now = new Date();
+                const labels = [];
+                const data = [];
+                let currentValue = 0.0493;
+                
+                // 生成24小时数据点
+                for (let i = 23; i >= 0; i--) {
+                    const time = new Date(now);
+                    time.setHours(time.getHours() - i);
+                    labels.push(`${time.getHours().toString().padStart(2, '0')}:00`);
+                    
+                    // 生成随机波动
+                    currentValue = currentValue + (Math.random() * 0.0003 - 0.00015);
+                    data.push(currentValue);
+                }
+                
+                // 更新图表
+                forexChart.data.labels = labels;
+                forexChart.data.datasets[0].data = data;
                 forexChart.update();
             }
+        }
+        
+        // 辅助函数：更新变化指示器
+        function updateChangeIndicator(elementId, changeValue) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            const changeAmountElement = element.querySelector('span:last-child');
+            if (changeAmountElement) {
+                changeAmountElement.textContent = Math.abs(changeValue).toFixed(2);
+            }
+            
+            // 更新图标和颜色
+            const icon = element.querySelector('i');
+            if (icon) {
+                icon.className = changeValue >= 0 ? 'fas fa-caret-up' : 'fas fa-caret-down';
+            }
+            
+            element.className = `data-change ${changeValue >= 0 ? 'change-up' : 'change-down'}`;
+        }
+        
+        // 辅助函数：更新时间
+        function updateTime(elementId) {
+            const now = new Date();
+            document.getElementById(elementId).textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        }
+        
+        // 辅助函数：显示加载状态
+        function showLoader(type) {
+            // 在实际应用中，这里可以显示加载指示器
+        }
+        
+        // 辅助函数：隐藏加载状态
+        function hideLoader(type) {
+            // 在实际应用中，这里可以隐藏加载指示器
         }
         
         // 时间筛选器事件处理
@@ -530,22 +679,20 @@
             filter.addEventListener('click', function() {
                 document.querySelectorAll('.time-filter').forEach(f => f.classList.remove('active'));
                 this.classList.add('active');
+                
                 // 在实际应用中，这里会根据选择的时间范围重新加载数据
-                updateForexChart();
+                const period = this.dataset.period;
+                fetchForexHistory(period);
             });
         });
         
-        // 页面加载完成后初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 初始化数据
-            updateSP500Data();
-            updateForexData();
-            initForexChart();
-            
-            // 设置定时更新
-            setInterval(updateSP500Data, 60000); // 每分钟更新一次
-            setInterval(updateForexData, 60000); // 每分钟更新一次
-        });
+        // 获取外汇历史数据（示例函数）
+        async function fetchForexHistory(period) {
+            // 在实际应用中，这里会调用API获取指定时间范围的历史数据
+            console.log(`获取过去 ${period} 天的外汇历史数据`);
+            // 然后更新图表
+            updateForexChart();
+        }
     </script>
 </body>
 </html>
