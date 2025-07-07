@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金融数据仪表盘</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #10b981;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --up: #10b981;
+            --down: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: var(--gray);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(30, 41, 59, 0.7);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+        }
+        
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+        
+        .update-time {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+        
+        .sp500-data {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        @media (max-width: 480px) {
+            .sp500-data {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .data-item {
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .data-item:hover {
+            background: rgba(15, 23, 42, 0.9);
+            transform: scale(1.03);
+        }
+        
+        .data-label {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 8px;
+        }
+        
+        .data-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .data-change {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        .change-up {
+            color: var(--up);
+        }
+        
+        .change-down {
+            color: var(--down);
+        }
+        
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .time-filters {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .time-filter {
+            padding: 8px 15px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .time-filter:hover, .time-filter.active {
+            background: var(--primary);
+        }
+        
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 0;
+            color: var(--gray);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+        }
+        
+        .loader {
+            text-align: center;
+            padding: 30px;
+            color: var(--gray);
+        }
+        
+        .loader i {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            animation: spin 1.5s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .market-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+        
+        .status-open {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--up);
+        }
+        
+        .status-closed {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--down);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>金融数据仪表盘</h1>
+            <p class="subtitle">实时追踪标普500指数与日元兑人民币汇率动态</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- 标普500指数卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-chart-line"></i>
+                        标普500指数
+                        <span class="market-status status-open">交易中</span>
+                    </h2>
+                    <div class="update-time">更新于: <span id="sp500-update-time">刚刚</span></div>
+                </div>
+                
+                <div class="sp500-data">
+                    <div class="data-item">
+                        <div class="data-label">当前价格</div>
+                        <div class="data-value" id="sp500-current">4,890.18</div>
+                        <div class="data-change change-up">
+                            <span class="trend-indicator">
+                                <i class="fas fa-caret-up"></i> 24.75 (0.51%)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">盘前价格</div>
+                        <div class="data-value" id="sp500-pre">4,895.42</div>
+                        <div class="data-change change-up">
+                            <span class="trend-indicator">
+                                <i class="fas fa-caret-up"></i> 5.24 (0.11%)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">盘后价格</div>
+                        <div class="data-value" id="sp500-post">4,888.65</div>
+                        <div class="data-change change-down">
+                            <span class="trend-indicator">
+                                <i class="fas fa-caret-down"></i> 1.53 (0.03%)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3>标普500期货</h3>
+                <div class="sp500-data">
+                    <div class="data-item">
+                        <div class="data-label">期货价格</div>
+                        <div class="data-value" id="sp500-futures">4,893.27</div>
+                        <div class="data-change change-up">
+                            <span class="trend-indicator">
+                                <i class="fas fa-caret-up"></i> 3.09 (0.06%)
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">今日高点</div>
+                        <div class="data-value" id="sp500-high">4,895.80</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">今日低点</div>
+                        <div class="data-value" id="sp500-low">4,865.45</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 日元汇率卡片 -->
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-yen-sign"></i>
+                        日元兑人民币汇率
+                    </h2>
+                    <div class="update-time">更新于: <span id="forex-update-time">刚刚</span></div>
+                </div>
+                
+                <div class="data-item">
+                    <div class="data-label">当前汇率</div>
+                    <div class="data-value" id="current-rate">0.0483</div>
+                    <div class="data-change change-down">
+                        <span class="trend-indicator">
+                            <i class="fas fa-caret-down"></i> 0.0002 (0.41%)
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="forex-chart"></canvas>
+                </div>
+                
+                <div class="time-filters">
+                    <div class="time-filter active">1天</div>
+                    <div class="time-filter">3天</div>
+                    <div class="time-filter">5天</div>
+                    <div class="time-filter">7天</div>
+                    <div class="time-filter">1个月</div>
+                </div>
+                
+                <h3>近期波动</h3>
+                <div class="sp500-data">
+                    <div class="data-item">
+                        <div class="data-label">1天</div>
+                        <div class="data-value change-down">-0.41%</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">3天</div>
+                        <div class="data-value change-up">+0.22%</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">5天</div>
+                        <div class="data-value change-down">-0.85%</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">7天</div>
+                        <div class="data-value change-down">-1.24%</div>
+                    </div>
+                    
+                    <div class="data-item">
+                        <div class="data-label">1个月</div>
+                        <div class="data-value change-down">-2.56%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>数据每60秒自动更新 | 免责声明：本页面数据为模拟数据，不构成投资建议</p>
+            <p>© 2023 金融数据仪表盘 | 设计开发</p>
+        </footer>
+    </div>
+
+    <script>
+        // 模拟实时数据更新
+        function updateSP500Data() {
+            // 生成随机但合理的数据
+            const basePrice = 4890 + (Math.random() * 20 - 10);
+            const current = basePrice.toFixed(2);
+            const preMarket = (basePrice + Math.random() * 5).toFixed(2);
+            const postMarket = (basePrice - Math.random() * 2).toFixed(2);
+            const futures = (basePrice + Math.random() * 3).toFixed(2);
+            const high = (basePrice + Math.random() * 10).toFixed(2);
+            const low = (basePrice - Math.random() * 25).toFixed(2);
+            
+            // 更新DOM元素
+            document.getElementById('sp500-current').textContent = current;
+            document.getElementById('sp500-pre').textContent = preMarket;
+            document.getElementById('sp500-post').textContent = postMarket;
+            document.getElementById('sp500-futures').textContent = futures;
+            document.getElementById('sp500-high').textContent = high;
+            document.getElementById('sp500-low').textContent = low;
+            
+            // 更新当前时间
+            const now = new Date();
+            document.getElementById('sp500-update-time').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        }
+        
+        // 更新日元汇率数据
+        function updateForexData() {
+            const baseRate = 0.0483 + (Math.random() * 0.0005 - 0.00025);
+            document.getElementById('current-rate').textContent = baseRate.toFixed(4);
+            
+            // 更新图表数据
+            updateForexChart();
+            
+            // 更新当前时间
+            const now = new Date();
+            document.getElementById('forex-update-time').textContent = 
+                `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+        }
+        
+        // 初始化图表
+        const ctx = document.getElementById('forex-chart').getContext('2d');
+        let forexChart;
+        
+        function initForexChart() {
+            const data = generateChartData();
+            
+            forexChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: '日元/人民币汇率',
+                        data: data.values,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#94a3b8'
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.05)'
+                            },
+                            ticks: {
+                                color: '#94a3b8',
+                                callback: function(value) {
+                                    return value.toFixed(4);
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    hover: {
+                        mode: 'nearest',
+                        intersect: true
+                    }
+                }
+            });
+        }
+        
+        // 生成图表数据
+        function generateChartData() {
+            const now = new Date();
+            const labels = [];
+            const values = [];
+            let currentValue = 0.0483;
+            
+            // 生成24小时数据点（每小时一个点）
+            for (let i = 23; i >= 0; i--) {
+                const time = new Date(now);
+                time.setHours(time.getHours() - i);
+                labels.push(`${time.getHours().toString().padStart(2, '0')}:00`);
+                
+                // 生成随机波动
+                currentValue = currentValue + (Math.random() * 0.0003 - 0.00015);
+                values.push(currentValue);
+            }
+            
+            return { labels, values };
+        }
+        
+        // 更新图表数据
+        function updateForexChart() {
+            if (forexChart) {
+                const data = generateChartData();
+                forexChart.data.labels = data.labels;
+                forexChart.data.datasets[0].data = data.values;
+                forexChart.update();
+            }
+        }
+        
+        // 时间筛选器事件处理
+        document.querySelectorAll('.time-filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                document.querySelectorAll('.time-filter').forEach(f => f.classList.remove('active'));
+                this.classList.add('active');
+                // 在实际应用中，这里会根据选择的时间范围重新加载数据
+                updateForexChart();
+            });
+        });
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化数据
+            updateSP500Data();
+            updateForexData();
+            initForexChart();
+            
+            // 设置定时更新
+            setInterval(updateSP500Data, 60000); // 每分钟更新一次
+            setInterval(updateForexData, 60000); // 每分钟更新一次
+        });
+    </script>
+</body>
+</html>
