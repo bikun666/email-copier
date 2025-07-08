@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ポケモン会員データ注入</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 2em; background: #f9f9f9; }
+    input, button { font-size: 16px; padding: 8px; margin: 10px 0; }
+    pre { background: #eee; padding: 1em; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h2>📁 上传 Excel 并生成 demo.js</h2>
+  <input type="file" id="xlsxInput" accept=".xlsx">
+  <button id="generateBtn">⬇️ 下载 demo.js</button>
+  <pre id="status">等待上传 .xlsx 文件…</pre>
+
+  <script>
+    let globalUserData = [];
+
+    function addressChange(address) {
+      const toFullWidthNumber = num => num.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
+      const toKanjiNumber = num => {
+        const kanjiDigits = ['〇','一','二','三','四','五','六','七','八','九'];
+        const n = parseInt(num, 10);
+        if (isNaN(n)) return num;
+        if (n <= 10) return kanjiDigits[n];
+        return num.split('').map(d => kanjiDigits[+d]).join('');
+      };
+      const [chome, ban, go] = address.split(/[-ー−]/);
+      if ([chome, ban, go].includes(undefined)) return address;
+      const chomeVariants = [ chome+"丁目", toFullWidthNumber(chome)+"ちょうめ", toFullWidthNumber(chome)+"チョウメ", toKanjiNumber(chome)+"丁目" ];
+      const banVariants = [ ban+"番", toFullWidthNumber(ban)+"ばん", toFullWidthNumber(ban)+"バン", toKanjiNumber(ban)+"番" ];
+      const goVariants = [ go+"号", toFullWidthNumber(go)+"ごう", toFullWidthNumber(go)+"ゴウ", toKanjiNumber(go)+"号" ];
+      while (true) {
+        const chomeStr = chomeVariants[Math.random() * chomeVariants.length | 0];
+        const banStr = banVariants[Math.random() * banVariants.length | 0];
+        const goStr = goVariants[Math.random() * goVariants.length | 0];
+        const useDash1 = Math.random() < 0.5;
+        const useDash2 = Math.random() < 0.5;
+        if (useDash1 && banStr === "一番") continue;
+        if (useDash2 && goStr === "一号") continue;
+        return chomeStr + (useDash1 ? '-' : '') + banStr + (useDash2 ? '-' : '') + goStr;
+      }
+    }
+
+    function parseXLSX(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const workbook = XLSX.read(e.target.result, { type: 'binary' });
+          const sheet = workbook.Sheets[workbook.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(sheet);
+          const data = json.map(r => ({
+            email: r.email,
+            rowpassword: (r.rowpassword || '').replace(/^orange1234\\./, ''),
+            name: r.name,
+            kana: r.kana,
+            phone: String(r.phone || ''),
+            birthday: String(r.birthday || ''),
+            postal: String(r.postal || ''),
+            myAddress1: r.myAddress1,
+            myAddress2: r.myAddress2,
+            gender: r.gender.includes('どちらも') ? '9' : '1'
+          }));
+          resolve(data);
+        };
+        reader.readAsBinaryString(file);
+      });
+    }
+
+    document.getElementById('xlsxInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      globalUserData = await parseXLSX(file);
+      document.getElementById('status').textContent = '✅ 已解析 ' + globalUserData.length + ' 条 user 数据';
+    });
+
+    document.getElementById('generateBtn').addEventListener('click', async () => {
+      if (!globalUserData.length) {
+        alert('请先上传 xlsx 文件'); return;
+      }
+      const resp = await fetch('./demo.js');
+      let jsText = await resp.text();
+      jsText = jsText.replace(/const userData = \\[[\\s\\S]*?];/, 'const userData = ' + JSON.stringify(globalUserData, null, 4) + ';');
+
+      const blob = new Blob([jsText], { type: 'application/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'demo.js';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  </script>
+</body>
+</html>
