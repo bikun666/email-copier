@@ -167,7 +167,11 @@
       }
       const resp = await fetch('./demo.js');
       let jsText = await resp.text();
-      jsText = jsText.replace(/const userData = \[[\s\S]*?];/, 'const userData = ' + JSON.stringify(globalUserData, null, 4) + ';');
+
+      jsText = jsText.replace(
+        /\/\/ USERDATA_PLACEHOLDER[^\n]*\nconst userData = \[[\s\S]*?\];/,
+        '// USERDATA_PLACEHOLDER\nconst userData = ' + JSON.stringify(globalUserData, null, 4) + ';'
+      );
 
       const blob = new Blob([jsText], { type: 'application/javascript' });
       const url = URL.createObjectURL(blob);
