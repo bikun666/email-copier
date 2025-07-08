@@ -1,191 +1,167 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ポケモン建号JS生成器</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: #fff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 2rem;
-        }
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(to right, #ff6e7f, #bfe9ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        input[type="file"] {
-            margin-bottom: 1rem;
-            padding: 0.5rem;
-            border-radius: 8px;
-            border: none;
-            font-size: 1rem;
-            background: #fff;
-            color: #333;
-        }
-        button {
-            padding: 0.7rem 2rem;
-            font-size: 1.1rem;
-            font-weight: bold;
-            background: linear-gradient(45deg, #ff6ec4, #7873f5);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            margin: 0.5rem;
-            transition: all 0.3s ease;
-        }
-        button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
-        }
-        .log {
-            margin-top: 2rem;
-            max-height: 200px;
-            overflow: auto;
-            width: 100%;
-            max-width: 600px;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 1rem;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-        @media (max-width: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
-            button {
-                width: 100%;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🔥 超级无敌酷炫 Demo.js 生成器</title>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at top left, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00f2ff;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    label.upload-btn {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      padding: 12px 25px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      box-shadow: 0 0 15px rgba(0,198,255,0.5);
+      margin-bottom: 15px;
+      transition: transform 0.2s;
+    }
+    label.upload-btn:hover {
+      transform: scale(1.05);
+    }
+    button {
+      background: linear-gradient(135deg, #fc466b, #3f5efb);
+      border: none;
+      color: #fff;
+      padding: 12px 30px;
+      font-size: 1.1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(252, 70, 107, 0.5);
+      transition: transform 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+      button, label.upload-btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h1>🔥 ポケモン建号 JS 超级生成器</h1>
-    <input type="file" id="xlsxFile" accept=".xlsx">
-    <button onclick="handleGenerate()">✨ 生成 new.js</button>
-    <div class="log" id="log"></div>
+  <h1>✨ Demo.js 超级生成器</h1>
+  <label class="upload-btn">
+    📁 上传 Excel 文件
+    <input type="file" id="xlsxInput" accept=".xlsx">
+  </label>
+  <button id="generateBtn">🚀 生成并下载 new.js</button>
 
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script>
-        let globalUserData = [];
+  <script>
+    const addressChange = (address) => {
+      const toFullWidthNumber = num => num.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
+      const toKanjiNumber = num => {
+        const kanjiDigits = ['〇','一','二','三','四','五','六','七','八','九'];
+        const n = parseInt(num, 10);
+        if (isNaN(n)) return num;
+        if (n <= 10) return kanjiDigits[n];
+        return num.split('').map(d => kanjiDigits[parseInt(d)]).join('');
+      };
+      const [chome, ban, go] = address.split(/[-ー−]/);
+      if ([chome, ban, go].includes(undefined)) return address;
+      const chomeVariants = [ chome + "丁目", toFullWidthNumber(chome) + "ちょうめ", toKanjiNumber(chome) + "丁目" ];
+      const banVariants = [ ban + "番", toFullWidthNumber(ban) + "ばん", toKanjiNumber(ban) + "番" ];
+      const goVariants = [ go + "号", toFullWidthNumber(go) + "ごう", toKanjiNumber(go) + "号" ];
+      while (true) {
+        const c = chomeVariants[Math.floor(Math.random() * chomeVariants.length)];
+        const b = banVariants[Math.floor(Math.random() * banVariants.length)];
+        const g = goVariants[Math.floor(Math.random() * goVariants.length)];
+        if (b === "一番" && Math.random() < 0.5) continue;
+        if (g === "一号" && Math.random() < 0.5) continue;
+        return `${c}-${b}-${g}`;
+      }
+    };
 
-        const log = (msg) => {
-            document.getElementById('log').innerText += msg + '\n';
-        };
+    const generateRandomPhone = () => {
+      const prefix = ['070', '080', '090'][Math.floor(Math.random() * 3)];
+      return prefix + Array.from({ length: 8 }, () => Math.floor(Math.random() * 10)).join('');
+    };
 
-        function addressChange(address) {
-            const toFullWidthNumber = (num) => num.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
-            const toKanjiNumber = (num) => {
-                const kanjiDigits = ['〇','一','二','三','四','五','六','七','八','九'];
-                const n = parseInt(num, 10);
-                if (isNaN(n)) return num;
-                if (n <= 10) return kanjiDigits[n];
-                return num.split('').map(d => kanjiDigits[parseInt(d)]).join('');
-            };
+    const generateRandomString = (len) => {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      return Array.from({ length: len }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    };
 
-            const [chome, ban, go] = address.split(/[-ー−]/);
-            if ([chome, ban, go].includes(undefined)) return address;
+    const downloadJS = (jsText) => {
+      try {
+        const blob = new Blob([jsText], { type: 'application/javascript' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'new.js';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        console.log('✅ new.js 下载成功');
+      } catch (e) {
+        alert('❌ 下载失败：' + e.message);
+      }
+    };
 
-            const chomeVariants = [
-                chome + "丁目",
-                toFullWidthNumber(chome) + "ちょうめ",
-                toFullWidthNumber(chome) + "チョウメ",
-                toKanjiNumber(chome) + "丁目"
-            ];
-            const banVariants = [
-                ban + "番",
-                toFullWidthNumber(ban) + "ばん",
-                toFullWidthNumber(ban) + "バン",
-                toKanjiNumber(ban) + "番"
-            ];
-            const goVariants = [
-                go + "号",
-                toFullWidthNumber(go) + "ごう",
-                toFullWidthNumber(go) + "ゴウ",
-                toKanjiNumber(go) + "号"
-            ];
+    document.getElementById('generateBtn').addEventListener('click', () => {
+      const input = document.getElementById('xlsxInput');
+      if (!input.files.length) {
+        alert("请先上传 xlsx 文件");
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet);
 
-            while (true) {
-                const chomeStr = chomeVariants[Math.floor(Math.random() * chomeVariants.length)];
-                const banStr = banVariants[Math.floor(Math.random() * banVariants.length)];
-                const goStr = goVariants[Math.floor(Math.random() * goVariants.length)];
-                const useDash1 = Math.random() < 0.5;
-                const useDash2 = Math.random() < 0.5;
-                if (useDash1 && banStr === "一番") continue;
-                if (useDash2 && goStr === "一号") continue;
-                return chomeStr + (useDash1 ? '-' : '') + banStr + (useDash2 ? '-' : '') + goStr;
-            }
-        }
+        const processed = rows.map(row => {
+          return {
+            email: row.email || "",
+            rowpassword: row.rowpassword || "Abc1234.",
+            name: row.name || "",
+            kana: row.kana || "",
+            phone: row.phone || generateRandomPhone(),
+            birthday: row.birthday || "19900101",
+            postal: row.postal || "100-0001",
+            myAddress1: row.myAddress1 || "1-1-1",
+            myAddress2: row.myAddress2 || "自動生成部屋101",
+            gender: row.gender || "9"
+          };
+        });
 
-        function generatePhone() {
-            const prefix = ['070', '080', '090'][Math.floor(Math.random() * 3)];
-            return prefix + Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
-        }
-
-        function randomStr(len) {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-            return Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-        }
-
-        async function handleGenerate() {
-            const fileInput = document.getElementById('xlsxFile');
-            if (!fileInput.files.length) return alert('请先上传xlsx文件');
-            const file = fileInput.files[0];
-            const data = await file.arrayBuffer();
-            const workbook = XLSX.read(data);
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            log(`读取 ${json.length} 行数据`);
-
-            globalUserData = json.map(row => ({
-                email: row.email,
-                rowpassword: row.rowpassword || 'Abc1234.',
-                name: row.name,
-                kana: row.kana,
-                phone: row.phone || generatePhone(),
-                birthday: row.birthday,
-                postal: row.postal,
-                myAddress1: row.myAddress1,
-                myAddress2: row.myAddress2,
-                gender: row.gender
-            }));
-
-            for (const user of globalUserData) {
-                user.nickname = randomStr(5);
-                user.addressFull = addressChange(user.myAddress1) + ' ' + user.myAddress2;
-            }
-
-            const demoUrl = './demo.js';
-            const resp = await fetch(demoUrl);
-            let jsText = await resp.text();
-
-            jsText = jsText.replace(
-                /\/\/ USERDATA_PLACEHOLDER[^\n]*\nconst userData = \[[\s\S]*?\];/,
-                '// USERDATA_PLACEHOLDER\nconst userData = ' + JSON.stringify(globalUserData, null, 4) + ';'
-            );
-
-            const blob = new Blob([jsText], {type: 'application/javascript'});
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'new.js';
-            a.click();
-        }
-    </script>
+        const userDataJSON = JSON.stringify(processed, null, 2);
+        fetch("demo.js")
+          .then(res => res.text())
+          .then(text => {
+            const replaced = text.replace(/const userData = \[\s*\/\/ USERDATA_PLACEHOLDER[\s\S]*?\];/, `const userData = ${userDataJSON};`);
+            downloadJS(replaced);
+          })
+          .catch(err => alert("❌ 加载 demo.js 失败: " + err));
+      };
+      reader.readAsArrayBuffer(input.files[0]);
+    });
+  </script>
 </body>
 </html>
