@@ -2,19 +2,76 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ポケモン会員データ注入</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
-    body { font-family: sans-serif; padding: 2em; background: #f9f9f9; }
-    input, button { font-size: 16px; padding: 8px; margin: 10px 0; }
-    pre { background: #eee; padding: 1em; overflow-x: auto; }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2em 1em;
+      color: #333;
+    }
+    h1, h2 {
+      margin: 0.5em 0;
+      text-align: center;
+    }
+    .card {
+      background: white;
+      padding: 2em;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      max-width: 500px;
+      width: 100%;
+      text-align: center;
+    }
+    input[type="file"], button {
+      width: 100%;
+      padding: 0.8em;
+      margin: 1em 0;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+    input[type="file"] {
+      background: #f0f0f0;
+    }
+    button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.3s ease;
+    }
+    button:hover {
+      transform: scale(1.03);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    pre {
+      background: #f4f4f4;
+      padding: 1em;
+      border-radius: 10px;
+      width: 100%;
+      overflow-x: auto;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      .card { padding: 1.2em; }
+    }
   </style>
 </head>
 <body>
-  <h2>📁 上传 Excel 并生成 demo.js</h2>
-  <input type="file" id="xlsxInput" accept=".xlsx">
-  <button id="generateBtn">⬇️ 下载 demo.js</button>
-  <pre id="status">等待上传 .xlsx 文件…</pre>
+  <div class="card">
+    <h2>📁 上传 Excel 并生成 demo.js</h2>
+    <input type="file" id="xlsxInput" accept=".xlsx">
+    <button id="generateBtn">⬇️ 下载 demo.js</button>
+    <pre id="status">等待上传 .xlsx 文件…</pre>
+  </div>
 
   <script>
     let globalUserData = [];
@@ -45,6 +102,20 @@
       }
     }
 
+    function generateRandomPhone() {
+      const prefix = ['070', '080', '090'][Math.floor(Math.random() * 3)];
+      let phone = prefix;
+      for (let i = 0; i < 8; i++) {
+        phone += Math.floor(Math.random() * 10);
+      }
+      return phone;
+    }
+
+    function generateRandomString(length) {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+      return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
     function parseXLSX(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -52,17 +123,24 @@
           const workbook = XLSX.read(e.target.result, { type: 'binary' });
           const sheet = workbook.Sheets[workbook.SheetNames[0]];
           const json = XLSX.utils.sheet_to_json(sheet);
+          if (!json[0] || !json[0].email || !json[0].rowpassword) {
+            alert('❌ 表格缺少必要字段 (email, rowpassword 等)，请检查 Excel');
+            reject('invalid header');
+            return;
+          }
           const data = json.map(r => ({
             email: r.email,
-            rowpassword: (r.rowpassword || '').replace(/^orange1234\\./, ''),
+            rowpassword: r.rowpassword ? r.rowpassword.replace(/^orange1234\./, '') : 'Abc1234.',
             name: r.name,
             kana: r.kana,
-            phone: String(r.phone || ''),
+            phone: r.phone ? String(r.phone) : generateRandomPhone(),
             birthday: String(r.birthday || ''),
             postal: String(r.postal || ''),
             myAddress1: r.myAddress1,
             myAddress2: r.myAddress2,
-            gender: r.gender.includes('どちらも') ? '9' : '1'
+            gender: r.gender && r.gender.includes('どちらも') ? '9' : '1',
+            nickname: generateRandomString(5),
+            addressFull: r.myAddress1 ? addressChange(r.myAddress1) + ' ' + r.myAddress2 : r.myAddress2
           }));
           resolve(data);
         };
@@ -73,17 +151,23 @@
     document.getElementById('xlsxInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      globalUserData = await parseXLSX(file);
-      document.getElementById('status').textContent = '✅ 已解析 ' + globalUserData.length + ' 条 user 数据';
+      try {
+        globalUserData = await parseXLSX(file);
+        document.getElementById('status').textContent = '✅ 已解析 ' + globalUserData.length + ' 条 user 数据';
+        window.userData = globalUserData;
+      } catch(err) {
+        document.getElementById('status').textContent = '❌ 解析失败，请检查格式';
+      }
     });
 
     document.getElementById('generateBtn').addEventListener('click', async () => {
-      if (!globalUserData.length) {
-        alert('请先上传 xlsx 文件'); return;
+      if (!Array.isArray(globalUserData) || globalUserData.length === 0) {
+        alert('⚠️ 请先上传有效的 Excel 文件');
+        return;
       }
       const resp = await fetch('./demo.js');
       let jsText = await resp.text();
-      jsText = jsText.replace(/const userData = \\[[\\s\\S]*?];/, 'const userData = ' + JSON.stringify(globalUserData, null, 4) + ';');
+      jsText = jsText.replace(/const userData = \[[\s\S]*?];/, 'const userData = ' + JSON.stringify(globalUserData, null, 4) + ';');
 
       const blob = new Blob([jsText], { type: 'application/javascript' });
       const url = URL.createObjectURL(blob);
