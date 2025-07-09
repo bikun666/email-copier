@@ -7,49 +7,94 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
         }
-        #userDataDisplay {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 15px;
+        .container {
+            background-color: #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            width: 80%;
+            max-width: 900px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+        input[type="file"] {
+            font-size: 16px;
+            padding: 10px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            white-space: pre-wrap; /* 保持格式 */
-            font-size: 14px;
+            border: 2px solid #ddd;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
         }
         button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+            width: 48%;
+        }
+        button#copy-btn {
             background-color: #4CAF50;
             color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
         }
-        button:hover {
+        button#copy-btn:hover {
             background-color: #45a049;
         }
-        #reset-button {
+        button#reset-btn {
             background-color: #f44336;
+            color: white;
         }
-        #reset-button:hover {
+        button#reset-btn:hover {
             background-color: #e53935;
+        }
+        #userDataDisplay {
+            margin-top: 30px;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
 <body>
 
-    <h1>Excel 数据转为 JavaScript 数组</h1>
+    <div class="container">
+        <h1>Excel 数据转为 JavaScript 数组</h1>
 
-    <input type="file" id="file-input" accept=".xlsx" />
-    <button onclick="copyToClipboard()">复制数据</button>
-    <button id="reset-button" onclick="resetData()">重置</button>
+        <input type="file" id="file-input" accept=".xlsx" />
+        
+        <div class="button-container">
+            <button id="copy-btn" onclick="copyToClipboard()">复制数据</button>
+            <button id="reset-btn" onclick="resetData()">重置</button>
+        </div>
 
-    <div id="userDataDisplay"></div>
+        <div id="userDataDisplay"></div>
+    </div>
 
     <script>
         function handleFile(event) {
@@ -70,7 +115,7 @@
                 // 如果 email 为空，则跳过这一行
                 if (!row["email"]) return null;
 
-                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`; 
+                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
             }).filter(row => row !== null);  // 过滤掉 email 为空的行
 
             displayUserData(userData);
