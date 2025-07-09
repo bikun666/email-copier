@@ -15,7 +15,6 @@
       align-items: center;
       padding: 2rem 1rem;
     }
-
     h1 {
       font-size: 2.5rem;
       color: #80f0ff;
@@ -23,7 +22,6 @@
       margin-bottom: 1rem;
       text-align: center;
     }
-
     #message {
       margin-top: 0.5rem;
       color: #7af2ff;
@@ -31,7 +29,6 @@
       font-size: 1rem;
       text-shadow: 0 0 3px #00ffff;
     }
-
     input[type=file], button {
       margin: 1rem 0.5rem;
       padding: 0.8rem 1.8rem;
@@ -41,21 +38,17 @@
       cursor: pointer;
       font-weight: bold;
     }
-
     button {
       background: linear-gradient(135deg, #00c6ff, #0072ff);
       color: white;
     }
-
     button:hover {
       box-shadow: 0 0 10px #00f7ff;
       transform: scale(1.05);
     }
-
     .copy-btn {
       background: linear-gradient(135deg, #00ff99, #00cc66);
     }
-
     pre {
       width: 100%;
       max-width: 1000px;
@@ -69,7 +62,6 @@
       font-size: 0.85rem;
       box-shadow: 0 0 10px rgba(0,255,255,0.3);
     }
-
     @media (max-width: 768px) {
       h1 { font-size: 1.7rem; }
       pre { font-size: 0.75rem; }
@@ -133,7 +125,7 @@ const userData = [];
   };
 
   const setRadio = (value) => {
-    const radios = document.querySelectorAll(\`input[type="radio"][value="\${value}"]\`);
+    const radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
     radios.forEach(radio => {
       if (!radio.checked) {
         radio.checked = true;
@@ -187,48 +179,70 @@ const userData = [];
   }
 })();`;
 
-    let userData = [];
-
-    const message = (text) => {
+    function message(text) {
       document.getElementById('message').textContent = text;
-    };
+    }
+
+    function addressChange(address) {
+      const toFullWidth = s => s.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
+      const toKanji = s => {
+        const k = ['〇','一','二','三','四','五','六','七','八','九'];
+        return s.split('').map(d => k[+d] || d).join('');
+      };
+      const [chome, ban, go] = address.split(/[-ー−]/);
+      if (!chome || !ban || !go) return address;
+      const c = [chome + '丁目', toFullWidth(chome) + 'ちょうめ', toKanji(chome) + '丁目'];
+      const b = [ban + '番', toFullWidth(ban) + 'ばん', toKanji(ban) + '番'];
+      const g = [go + '号', toFullWidth(go) + 'ごう', toKanji(go) + '号'];
+      const r = c[Math.floor(Math.random()*c.length)] +
+                (Math.random()<0.5 ? '-' : '') +
+                b[Math.floor(Math.random()*b.length)] +
+                (Math.random()<0.5 ? '-' : '') +
+                g[Math.floor(Math.random()*g.length)];
+      return r;
+    }
+
+    let userData = [];
 
     document.getElementById('xlsxInput').addEventListener('change', async function (e) {
       const file = e.target.files[0];
       if (!file) return message('❌ 未选择文件');
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const wb = XLSX.read(data);
+      const sheet = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(sheet);
 
-      userData = json.map(row => ({
-        email: row.email || '',
-        rowpassword: row.rowpassword || 'Abc1234.',
-        name: row.name || '',
-        kana: row.kana || '',
-        phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
-        birthday: String(row.birthday || '19900101'),
-        postal: row.postal || '',
-        myAddress: `${row.myAddress1 || ''} ${row.myAddress2 || ''}`.trim(),
-        gender: row.gender || 'どちらも選ばない'
-      }));
+      // ✅ 新增：跳过 email 为空的
+      userData = json
+        .filter(row => row.No && row.email)
+        .map(row => ({
+          email: row.email,
+          rowpassword: row.rowpassword || 'Abc1234.',
+          name: row.name || '',
+          kana: row.kana || '',
+          phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
+          birthday: String(row.birthday || '19900101'),
+          postal: row.postal || '',
+          myAddress: `${addressChange(row.myAddress1 || '')} ${row.myAddress2 || ''}`.trim(),
+          gender: row.gender || 'どちらも選ばない'
+        }));
 
-      message(`✅ 已读取 ${userData.length} 条数据`);
+      message(`✅ 读取 ${userData.length} 条有效数据`);
     });
 
     function generateJS() {
       if (!userData.length) return message('❌ 请先上传 Excel 文件');
       const oneLine = userData.map(obj => JSON.stringify(obj)).join(',\n');
       const block = `// USERDATA_START\nconst userData = [\n${oneLine}\n];\n// USERDATA_END`;
-      const result = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
-      document.getElementById('output').textContent = result;
+      const final = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
+      document.getElementById('output').textContent = final;
       message('✅ JS 已生成');
     }
 
     function copyJS() {
       const text = document.getElementById('output').textContent;
       navigator.clipboard.writeText(text).then(() => {
-        message('✅ JS 已复制到剪贴板');
+        message('✅ 已复制到剪贴板');
       });
     }
   </script>
