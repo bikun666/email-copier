@@ -1,70 +1,81 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Excel到油猴脚本生成器</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel 数据转为 UserData</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        #userDataDisplay {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap; /* 保持格式 */
+            font-size: 14px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
-  <h1>上传Excel并生成替换后的油猴脚本</h1>
-  <input type="file" id="fileInput" />
-  <pre id="output"></pre>
 
-  <script>
-    document.getElementById('fileInput').addEventListener('change', handleFileUpload, false);
+    <h1>Excel 数据转为 JavaScript 数组并替换油猴脚本</h1>
 
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    <input type="file" id="file-input" accept=".xlsx" />
+    <button onclick="copyToClipboard()">复制油猴脚本</button>
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+    <div id="userDataDisplay"></div>
 
-        // 选择工作表（假设只有一个工作表）
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        
-        // 将工作表转化为JSON格式
-        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-        const userData = processData(jsonData);
-        
-        // 生成替换后的油猴脚本
-        const updatedScript = generateUpdatedScript(userData);
-
-        // 输出更新后的油猴脚本
-        const output = document.getElementById('output');
-        output.textContent = updatedScript;
-      };
-
-      reader.readAsBinaryString(file);
-    }
-
-    function processData(data) {
-      const headers = data[0];
-      const userData = [];
-      
-      // 遍历每一行数据（跳过标题行）
-      for (let i = 1; i < data.length; i++) {
-        const row = data[i];
-        const user = {};
-
-        // 将每一列数据匹配到user对象
-        for (let j = 0; j < headers.length; j++) {
-          const key = headers[j].toLowerCase().replace(/\s+/g, ''); // 去除空格
-          user[key] = row[j] || '';
+    <script>
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = e.target.result;
+                const workbook = XLSX.read(data, {type: 'binary'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; // 只选择第一个sheet
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet); // 将第一个sheet转为JSON数据
+                processData(jsonData);
+            };
+            reader.readAsBinaryString(file);
         }
 
-        userData.push(user);
-      }
+        function processData(data) {
+            const userData = data.map(row => {
+                // 如果 email 为空，则跳过这一行
+                if (!row["email"]) return null;
 
-      return userData;
-    }
+                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
+            }).filter(row => row !== null);  // 过滤掉 email 为空的行
 
-    function generateUpdatedScript(userData) {
-      // 油猴脚本模板
-      const scriptTemplate = `// ==UserScript==
+            displayUserData(userData);
+        }
+
+        function displayUserData(userData) {
+            const userDataDisplay = document.getElementById('userDataDisplay');
+            const updatedScript = generateUpdatedScript(userData);
+            userDataDisplay.innerHTML = `<pre>${updatedScript}</pre>`;
+        }
+
+        function generateUpdatedScript(userData) {
+            const scriptTemplate =  `// ==UserScript==
 // @name kunポケモンセンター会員登録自動化助手 (接单) - 完整增强版
 // @namespace http://tampermonkey.net/
 // @version 3.6
@@ -708,11 +719,24 @@ const userData = ${JSON.stringify(userData, null, 2)};
     console.log('[会员注册助手] ✅ 脚本加载完成 (完整增强版 v3.6)');
 
 })();
-
 `;
 
-      return scriptTemplate;
-    }
-  </script>
+            return scriptTemplate;
+        }
+
+        function copyToClipboard() {
+            const text = document.getElementById('userDataDisplay').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('油猴脚本已复制到剪贴板!');
+        }
+
+        document.getElementById('file-input').addEventListener('change', handleFile);
+    </script>
+
 </body>
 </html>
