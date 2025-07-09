@@ -28,9 +28,16 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #45a049;
+        }
+        #reset-button {
+            background-color: #f44336;
+        }
+        #reset-button:hover {
+            background-color: #e53935;
         }
     </style>
 </head>
@@ -40,6 +47,7 @@
 
     <input type="file" id="file-input" accept=".xlsx" />
     <button onclick="copyToClipboard()">复制数据</button>
+    <button id="reset-button" onclick="resetData()">重置</button>
 
     <div id="userDataDisplay"></div>
 
@@ -62,7 +70,7 @@
                 // 如果 email 为空，则跳过这一行
                 if (!row["email"]) return null;
 
-                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
+                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`; 
             }).filter(row => row !== null);  // 过滤掉 email 为空的行
 
             displayUserData(userData);
@@ -82,7 +90,11 @@
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-            alert('数据已复制到剪贴板!');
+        }
+
+        function resetData() {
+            document.getElementById('file-input').value = '';  // 清空文件输入框
+            document.getElementById('userDataDisplay').innerHTML = '';  // 清空显示区域
         }
 
         document.getElementById('file-input').addEventListener('change', handleFile);
