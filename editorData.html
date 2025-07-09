@@ -197,4 +197,41 @@ const userData = [];
       const file = e.target.files[0];
       if (!file) return message('❌ 未选择文件');
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet);
+
+      userData = json.map(row => ({
+        email: row.email || '',
+        rowpassword: row.rowpassword || 'Abc1234.',
+        name: row.name || '',
+        kana: row.kana || '',
+        phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
+        birthday: String(row.birthday || '19900101'),
+        postal: row.postal || '',
+        myAddress: `${row.myAddress1 || ''} ${row.myAddress2 || ''}`.trim(),
+        gender: row.gender || 'どちらも選ばない'
+      }));
+
+      message(`✅ 已读取 ${userData.length} 条数据`);
+    });
+
+    function generateJS() {
+      if (!userData.length) return message('❌ 请先上传 Excel 文件');
+      const oneLine = userData.map(obj => JSON.stringify(obj)).join(',\n');
+      const block = `// USERDATA_START\nconst userData = [\n${oneLine}\n];\n// USERDATA_END`;
+      const result = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
+      document.getElementById('output').textContent = result;
+      message('✅ JS 已生成');
+    }
+
+    function copyJS() {
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        message('✅ JS 已复制到剪贴板');
+      });
+    }
+  </script>
+
+</body>
+</html>
