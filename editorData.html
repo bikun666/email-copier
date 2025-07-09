@@ -8,9 +8,8 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(ellipse at center, #0f0c29, #302b63, #24243e);
+      background: radial-gradient(circle at top, #0f0c29, #302b63, #24243e);
       color: #eee;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -21,8 +20,16 @@
       font-size: 2.5rem;
       color: #80f0ff;
       text-shadow: 0 0 10px #80f0ff, 0 0 20px #00ffff;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
       text-align: center;
+    }
+
+    #message {
+      margin-top: 0.5rem;
+      color: #7af2ff;
+      font-weight: bold;
+      font-size: 1rem;
+      text-shadow: 0 0 3px #00ffff;
     }
 
     input[type=file], button {
@@ -32,7 +39,6 @@
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      transition: all 0.3s ease;
       font-weight: bold;
     }
 
@@ -74,12 +80,13 @@
 <body>
 
   <h1>🌌 ポケモン注册 JS 生成器</h1>
+  <div id="message">请上传 Excel 文件</div>
 
   <input type="file" id="xlsxInput" accept=".xlsx" />
   <button onclick="generateJS()">🚀 生成 JS</button>
   <button class="copy-btn" onclick="copyJS()">📋 复制</button>
 
-  <pre id="output">// 请先上传 Excel 文件再点击生成</pre>
+  <pre id="output">// 请先上传 Excel 文件并点击生成</pre>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
@@ -182,41 +189,12 @@ const userData = [];
 
     let userData = [];
 
+    const message = (text) => {
+      document.getElementById('message').textContent = text;
+    };
+
     document.getElementById('xlsxInput').addEventListener('change', async function (e) {
       const file = e.target.files[0];
-      if (!file) return alert('请上传 Excel 文件');
+      if (!file) return message('❌ 未选择文件');
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const sheet = workbook.Sheets[workbook.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet);
-
-      userData = json.map(row => ({
-        email: row.email || '',
-        rowpassword: row.rowpassword || 'Abc1234.',
-        name: row.name || '',
-        kana: row.kana || '',
-        phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
-        birthday: String(row.birthday || '19900101'),
-        postal: row.postal || '',
-        myAddress: `${row.myAddress1 || ''} ${row.myAddress2 || ''}`.trim(),
-        gender: row.gender || 'どちらも選ばない'
-      }));
-
-      alert('✅ Excel 数据读取成功！点击生成 JS');
-    });
-
-    function generateJS() {
-      if (!userData.length) return alert('请先上传 Excel 文件');
-      const block = `// USERDATA_START\nconst userData = ${JSON.stringify(userData, null, 2)};\n// USERDATA_END`;
-      const result = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
-      document.getElementById('output').textContent = result;
-    }
-
-    function copyJS() {
-      const text = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(text).then(() => alert('✅ 已复制 JS 代码'));
-    }
-  </script>
-
-</body>
-</html>
+      const workbook = XLSX.read
