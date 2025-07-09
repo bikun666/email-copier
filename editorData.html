@@ -58,8 +58,11 @@
 
         function processData(data) {
             const userData = data.map(row => {
+                // 如果 email 为空，则跳过这一行
+                if (!row["email"]) return null;
+
                 return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
-            });
+            }).filter(row => row !== null);  // 过滤掉 email 为空的行
 
             displayUserData(userData);
         }
