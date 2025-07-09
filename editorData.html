@@ -1,115 +1,180 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>✨ 美女风自动生成 JS ✨</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Hiragino Kaku Gothic ProN', 'Segoe UI', sans-serif;
-      background: linear-gradient(to bottom right, #fbd3e9, #bb377d);
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem;
-    }
-
-    h1 {
-      font-size: 2.4rem;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px #000;
-    }
-
-    .container {
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 2rem;
-      border-radius: 1.5rem;
-      backdrop-filter: blur(6px);
-      box-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-      width: 90%;
-      max-width: 600px;
-      text-align: center;
-    }
-
-    input[type="file"] {
-      margin-bottom: 1rem;
-      padding: 1rem;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.2);
-      border: none;
-      color: white;
-    }
-
-    button {
-      font-size: 1.2rem;
-      padding: 1rem 2rem;
-      margin-top: 1rem;
-      background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
-      border: none;
-      border-radius: 2rem;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-      transition: transform 0.2s;
-    }
-
-    button:hover {
-      transform: scale(1.05);
-    }
-
-    @media (max-width: 600px) {
-      h1 {
-        font-size: 1.8rem;
-      }
-
-      button {
-        width: 100%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ポケモン建号JS生成器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 2rem;
+            transition: all 0.8s ease-in-out;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, #ff758c, #ff7eb3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: rainbow 3s infinite alternate;
+        }
+        @keyframes rainbow {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+        input[type="file"] {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 1rem;
+            background: #fff;
+            color: #333;
+        }
+        button {
+            padding: 0.7rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #43e97b, #38f9d7);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            margin: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.2);
+        }
+        .log {
+            margin-top: 2rem;
+            max-height: 200px;
+            overflow: auto;
+            width: 100%;
+            max-width: 700px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>🌸 JS 自动生成器 for 美女站 🌸</h1>
-  <div class="container">
-    <input type="file" id="xlsxFile" accept=".xlsx" />
-    <br/>
-    <button onclick="handleXlsxUpload()">💾 生成并下载 new.js</button>
-  </div>
+    <h1>🚀 JS 生成器</h1>
+    <input type="file" id="xlsxFile" accept=".xlsx">
+    <button onclick="handleGenerate()">✨ 生成 JS</button>
+    <button onclick="copyJS()">📋 复制 JS</button>
+    <div class="log" id="log"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-  <script>
-    const DEMO_PATH = "demo.js"; // 与 HTML 同目录
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script>
+        let globalUserData = [];
 
-    async function handleXlsxUpload() {
-      const fileInput = document.getElementById("xlsxFile");
-      const file = fileInput.files[0];
-      if (!file) {
-        alert("请先上传 .xlsx 文件！");
-        return;
-      }
+        const log = (msg) => {
+            document.getElementById('log').innerText += msg + '\n';
+        };
 
-      const arrayBuffer = await file.arrayBuffer();
-      const workbook = XLSX.read(arrayBuffer);
-      const sheetName = workbook.SheetNames[0];
-      const sheet = workbook.Sheets[sheetName];
-      const data = XLSX.utils.sheet_to_json(sheet);
+        function addressChange(address) {
+            const toFullWidthNumber = (num) => num.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
+            const toKanjiNumber = (num) => {
+                const kanjiDigits = ['〇','一','二','三','四','五','六','七','八','九'];
+                const n = parseInt(num, 10);
+                if (isNaN(n)) return num;
+                if (n <= 10) return kanjiDigits[n];
+                return num.split('').map(d => kanjiDigits[parseInt(d)]).join('');
+            };
+            const [chome, ban, go] = address.split(/[-ー−]/);
+            if ([chome, ban, go].includes(undefined)) return address;
 
-      // 读取 demo.js 内容
-      const demoText = await fetch(DEMO_PATH).then(res => res.text());
-      const jsonStr = JSON.stringify(data, null, 2);
+            const chomeVariants = [chome + "丁目", toFullWidthNumber(chome) + "ちょうめ", toFullWidthNumber(chome) + "チョウメ", toKanjiNumber(chome) + "丁目"];
+            const banVariants = [ban + "番", toFullWidthNumber(ban) + "ばん", toFullWidthNumber(ban) + "バン", toKanjiNumber(ban) + "番"];
+            const goVariants = [go + "号", toFullWidthNumber(go) + "ごう", toFullWidthNumber(go) + "ゴウ", toKanjiNumber(go) + "号"];
 
-      // 替换 userData
-      const newJs = demoText.replace('__USER_DATA_REPLACE__', jsonStr);
+            while (true) {
+                const chomeStr = chomeVariants[Math.floor(Math.random() * chomeVariants.length)];
+                const banStr = banVariants[Math.floor(Math.random() * banVariants.length)];
+                const goStr = goVariants[Math.floor(Math.random() * goVariants.length)];
+                const useDash1 = Math.random() < 0.5;
+                const useDash2 = Math.random() < 0.5;
+                if (useDash1 && banStr === "一番") continue;
+                if (useDash2 && goStr === "一号") continue;
+                return chomeStr + (useDash1 ? '-' : '') + banStr + (useDash2 ? '-' : '') + goStr;
+            }
+        }
 
-      const blob = new Blob([newJs], { type: 'application/javascript' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = "new.js";
-      a.click();
-    }
-  </script>
+        function generatePhone() {
+            const prefix = ['070', '080', '090'][Math.floor(Math.random() * 3)];
+            return prefix + Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
+        }
+
+        function randomStr(len) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            return Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+        }
+
+        async function handleGenerate() {
+            const fileInput = document.getElementById('xlsxFile');
+            if (!fileInput.files.length) return alert('请先上传xlsx文件');
+            const file = fileInput.files[0];
+            const data = await file.arrayBuffer();
+            const workbook = XLSX.read(data);
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const json = XLSX.utils.sheet_to_json(sheet);
+            log(`读取 ${json.length} 行数据`);
+
+            globalUserData = json.map(row => ({
+                email: row.email,
+                rowpassword: row.rowpassword || 'Abc1234.',
+                name: row.name,
+                kana: row.kana,
+                phone: row.phone || generatePhone(),
+                birthday: row.birthday,
+                postal: row.postal,
+                myAddress: addressChange(row.myAddress1) + ' ' + row.myAddress2,
+                gender: row.gender,
+                nickname: randomStr(5)
+            }));
+
+            const demoUrl = './demo.js';
+            const resp = await fetch(demoUrl);
+            let jsText = await resp.text();
+            jsText = jsText.replace(
+                /// USERDATA_PLACEHOLDER[^
+]*\nconst userData = \[[\s\S]*?\];/,
+                '// USERDATA_PLACEHOLDER\nconst userData = ' + JSON.stringify(globalUserData, null, 0) + ';'
+            );
+
+            // 展示结果 & 提供复制
+            document.getElementById('log').innerText = jsText;
+        }
+
+        function copyJS() {
+            const text = document.getElementById('log').innerText;
+            navigator.clipboard.writeText(text).then(() => alert('已复制到剪贴板'));
+        }
+    </script>
 </body>
 </html>
