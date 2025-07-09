@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         ポケモンセンター会員登録自動化助手 (精简版)
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  自动填写注册表单（来自HTML注入userData）
 // @match        *://www.pokemoncenter-online.com/new-customer/*
 // @grant        none
@@ -10,8 +10,9 @@
 (function () {
   'use strict';
 
-  // USERDATA_PLACEHOLDER
+  // USERDATA_START
   const userData = [];
+  // USERDATA_END
 
   const generateRandomString = (length) => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -25,7 +26,7 @@
     el.dispatchEvent(new Event('change', { bubbles: true }));
     el.dispatchEvent(new Event('blur', { bubbles: true }));
   };
- 
+
   const setSelectValue = (el, val) => {
     if (!el) return;
     el.value = val;
