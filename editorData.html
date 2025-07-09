@@ -29,7 +29,7 @@
       font-size: 1rem;
       text-shadow: 0 0 3px #00ffff;
     }
-    input[type=file], button {
+    input[type="file"], button {
       margin: 1rem 0.5rem;
       padding: 0.8rem 1.8rem;
       font-size: 1rem;
@@ -125,7 +125,7 @@ const userData = [];
   };
 
   const setRadio = (value) => {
-    const radios = document.querySelectorAll(`input[type="radio"][value="${value}"]`);
+    const radios = document.querySelectorAll(\`input[type="radio"][value="\${value}"]\`);
     radios.forEach(radio => {
       if (!radio.checked) {
         radio.checked = true;
@@ -194,12 +194,13 @@ const userData = [];
       const c = [chome + '丁目', toFullWidth(chome) + 'ちょうめ', toKanji(chome) + '丁目'];
       const b = [ban + '番', toFullWidth(ban) + 'ばん', toKanji(ban) + '番'];
       const g = [go + '号', toFullWidth(go) + 'ごう', toKanji(go) + '号'];
-      const r = c[Math.floor(Math.random()*c.length)] +
-                (Math.random()<0.5 ? '-' : '') +
-                b[Math.floor(Math.random()*b.length)] +
-                (Math.random()<0.5 ? '-' : '') +
-                g[Math.floor(Math.random()*g.length)];
-      return r;
+      return (
+        c[Math.floor(Math.random() * c.length)] +
+        (Math.random() < 0.5 ? '-' : '') +
+        b[Math.floor(Math.random() * b.length)] +
+        (Math.random() < 0.5 ? '-' : '') +
+        g[Math.floor(Math.random() * g.length)]
+      );
     }
 
     let userData = [];
@@ -212,7 +213,6 @@ const userData = [];
       const sheet = wb.Sheets[wb.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(sheet);
 
-      // ✅ 新增：跳过 email 为空的
       userData = json
         .filter(row => row.No && row.email)
         .map(row => ({
@@ -245,7 +245,10 @@ const userData = [];
         message('✅ 已复制到剪贴板');
       });
     }
-  </script>
 
+    // ✅ 修复 generateJS 未定义问题
+    window.generateJS = generateJS;
+    window.copyJS = copyJS;
+  </script>
 </body>
 </html>
