@@ -3,75 +3,90 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ポケモン会員 JS 生成器</title>
+  <title>ポケモン JS 生成器</title>
   <style>
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
-      color: #333;
+      background: radial-gradient(ellipse at center, #0f0c29, #302b63, #24243e);
+      color: #eee;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 2rem;
+      padding: 2rem 1rem;
     }
+
     h1 {
-      font-size: 2.2rem;
-      color: #fff;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+      font-size: 2.5rem;
+      color: #80f0ff;
+      text-shadow: 0 0 10px #80f0ff, 0 0 20px #00ffff;
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
+
     input[type=file], button {
-      margin: 1rem 0;
-      padding: 0.6rem 1.5rem;
+      margin: 1rem 0.5rem;
+      padding: 0.8rem 1.8rem;
       font-size: 1rem;
-      border-radius: 8px;
       border: none;
-      cursor: pointer;
-    }
-    button {
-      background: #ff6a88;
-      color: white;
-      transition: all 0.3s ease;
-    }
-    button:hover {
-      background: #ff3e66;
-    }
-    pre {
-      background: #222;
-      color: #eee;
-      padding: 1rem;
-      max-width: 100%;
-      overflow-x: auto;
       border-radius: 10px;
-      font-size: 0.9rem;
-      white-space: pre-wrap;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
     }
+
+    button {
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+    }
+
+    button:hover {
+      box-shadow: 0 0 10px #00f7ff;
+      transform: scale(1.05);
+    }
+
     .copy-btn {
-      background: #4caf50;
-      margin-top: 0.5rem;
+      background: linear-gradient(135deg, #00ff99, #00cc66);
     }
+
+    pre {
+      width: 100%;
+      max-width: 1000px;
+      background: #1a1a2e;
+      color: #c7f9ff;
+      padding: 1rem;
+      border-radius: 12px;
+      overflow-x: auto;
+      margin-top: 2rem;
+      white-space: pre-wrap;
+      font-size: 0.85rem;
+      box-shadow: 0 0 10px rgba(0,255,255,0.3);
+    }
+
     @media (max-width: 768px) {
-      body { padding: 1rem; }
-      h1 { font-size: 1.5rem; }
+      h1 { font-size: 1.7rem; }
+      pre { font-size: 0.75rem; }
+      input, button { width: 90%; }
     }
   </style>
 </head>
 <body>
-  <h1>ポケモン自动填表脚本生成器</h1>
+
+  <h1>🌌 ポケモン注册 JS 生成器</h1>
 
   <input type="file" id="xlsxInput" accept=".xlsx" />
   <button onclick="generateJS()">🚀 生成 JS</button>
-  <button class="copy-btn" onclick="copyJS()">📋 复制代码</button>
+  <button class="copy-btn" onclick="copyJS()">📋 复制</button>
 
-  <pre id="output">请先上传 Excel 文件后生成</pre>
+  <pre id="output">// 请先上传 Excel 文件再点击生成</pre>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
     const templateJS = `// ==UserScript==
 // @name         ポケモンセンター会員登録自動化助手 (精简版)
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.0
 // @description  自动填写注册表单（来自HTML注入userData）
 // @match        *://www.pokemoncenter-online.com/new-customer/*
 // @grant        none
@@ -81,8 +96,8 @@
   'use strict';
 
   // USERDATA_START
-  const userData = [];
-  // USERDATA_END
+const userData = [];
+// USERDATA_END
 
   const generateRandomString = (length) => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
@@ -192,7 +207,6 @@
 
     function generateJS() {
       if (!userData.length) return alert('请先上传 Excel 文件');
-
       const block = `// USERDATA_START\nconst userData = ${JSON.stringify(userData, null, 2)};\n// USERDATA_END`;
       const result = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
       document.getElementById('output').textContent = result;
@@ -203,5 +217,6 @@
       navigator.clipboard.writeText(text).then(() => alert('✅ 已复制 JS 代码'));
     }
   </script>
+
 </body>
 </html>
