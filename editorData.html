@@ -8,7 +8,7 @@
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #0f0c29, #302b63, #24243e);
+      background: radial-gradient(circle at top, #2d033b, #810ca8, #cd5888);
       color: #eee;
       display: flex;
       flex-direction: column;
@@ -16,22 +16,20 @@
       padding: 2rem 1rem;
     }
     h1 {
-      font-size: 2.5rem;
-      color: #80f0ff;
-      text-shadow: 0 0 10px #80f0ff, 0 0 20px #00ffff;
+      font-size: 2.3rem;
+      color: #ffeaa7;
+      text-shadow: 0 0 10px #fffa65, 0 0 20px #f6e58d;
       margin-bottom: 1rem;
-      text-align: center;
     }
     #message {
       margin-top: 0.5rem;
-      color: #7af2ff;
+      color: #fab1a0;
       font-weight: bold;
       font-size: 1rem;
-      text-shadow: 0 0 3px #00ffff;
     }
-    input[type="file"], button {
+    input[type=file], button {
       margin: 1rem 0.5rem;
-      padding: 0.8rem 1.8rem;
+      padding: 0.8rem 1.6rem;
       font-size: 1rem;
       border: none;
       border-radius: 10px;
@@ -39,21 +37,21 @@
       font-weight: bold;
     }
     button {
-      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      background: linear-gradient(135deg, #fd79a8, #e84393);
       color: white;
     }
     button:hover {
-      box-shadow: 0 0 10px #00f7ff;
+      box-shadow: 0 0 10px #ffeaa7;
       transform: scale(1.05);
     }
     .copy-btn {
-      background: linear-gradient(135deg, #00ff99, #00cc66);
+      background: linear-gradient(135deg, #55efc4, #00cec9);
     }
     pre {
       width: 100%;
       max-width: 1000px;
-      background: #1a1a2e;
-      color: #c7f9ff;
+      background: #1e1e2f;
+      color: #f3f3f3;
       padding: 1rem;
       border-radius: 12px;
       overflow-x: auto;
@@ -63,7 +61,7 @@
       box-shadow: 0 0 10px rgba(0,255,255,0.3);
     }
     @media (max-width: 768px) {
-      h1 { font-size: 1.7rem; }
+      h1 { font-size: 1.5rem; }
       pre { font-size: 0.75rem; }
       input, button { width: 90%; }
     }
@@ -71,14 +69,14 @@
 </head>
 <body>
 
-  <h1>🌌 ポケモン注册 JS 生成器</h1>
+  <h1>🌸 ポケモン JS 生成器</h1>
   <div id="message">请上传 Excel 文件</div>
 
   <input type="file" id="xlsxInput" accept=".xlsx" />
   <button onclick="generateJS()">🚀 生成 JS</button>
   <button class="copy-btn" onclick="copyJS()">📋 复制</button>
 
-  <pre id="output">// 请先上传 Excel 文件并点击生成</pre>
+  <pre id="output">// 请上传 Excel 文件并点击生成</pre>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
@@ -165,7 +163,7 @@ const userData = [];
     btn.textContent = '🚀 填表';
     Object.assign(btn.style, {
       position: 'fixed', top: '50%', left: '10px', transform: 'translateY(-50%)',
-      zIndex: 9999, padding: '10px 20px', background: '#4caf50', color: '#fff', border: 'none', borderRadius: '8px',
+      zIndex: 9999, padding: '10px 20px', background: '#fd79a8', color: '#fff', border: 'none', borderRadius: '8px',
       fontWeight: 'bold', cursor: 'pointer'
     });
     btn.onclick = autoFillForm;
@@ -194,13 +192,11 @@ const userData = [];
       const c = [chome + '丁目', toFullWidth(chome) + 'ちょうめ', toKanji(chome) + '丁目'];
       const b = [ban + '番', toFullWidth(ban) + 'ばん', toKanji(ban) + '番'];
       const g = [go + '号', toFullWidth(go) + 'ごう', toKanji(go) + '号'];
-      return (
-        c[Math.floor(Math.random() * c.length)] +
-        (Math.random() < 0.5 ? '-' : '') +
-        b[Math.floor(Math.random() * b.length)] +
-        (Math.random() < 0.5 ? '-' : '') +
-        g[Math.floor(Math.random() * g.length)]
-      );
+      return c[Math.floor(Math.random()*c.length)] +
+             (Math.random()<0.5 ? '-' : '') +
+             b[Math.floor(Math.random()*b.length)] +
+             (Math.random()<0.5 ? '-' : '') +
+             g[Math.floor(Math.random()*g.length)];
     }
 
     let userData = [];
@@ -214,7 +210,7 @@ const userData = [];
       const json = XLSX.utils.sheet_to_json(sheet);
 
       userData = json
-        .filter(row => row.No && row.email)
+        .filter(row => row.email)
         .map(row => ({
           email: row.email,
           rowpassword: row.rowpassword || 'Abc1234.',
@@ -245,10 +241,7 @@ const userData = [];
         message('✅ 已复制到剪贴板');
       });
     }
-
-    // ✅ 修复 generateJS 未定义问题
-    window.generateJS = generateJS;
-    window.copyJS = copyJS;
   </script>
+
 </body>
 </html>
