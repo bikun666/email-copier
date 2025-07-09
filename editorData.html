@@ -1,131 +1,113 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>最强JS生成器</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ポケモン自動填表 JS 生成器</title>
   <style>
-    * { box-sizing: border-box; }
     body {
-      margin: 0; padding: 2rem;
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(270deg, #1a2a6c, #b21f1f, #fdbb2d);
-      background-size: 600% 600%;
-      animation: bgmove 30s ease infinite;
-      color: #fff;
-      display: flex; flex-direction: column;
-      align-items: center; min-height: 100vh;
-    }
-    @keyframes bgmove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      background: linear-gradient(135deg, #ffdde1, #ee9ca7);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 2rem;
     }
     h1 {
       font-size: 2.2rem;
-      margin-bottom: 1rem;
-      background: linear-gradient(to right, #ff758c, #ff7eb3);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      animation: rainbow 4s infinite alternate;
+      color: #fff;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
     }
-    @keyframes rainbow {
-      from { filter: hue-rotate(0deg); }
-      to   { filter: hue-rotate(360deg); }
-    }
-    input[type="file"] {
-      margin-bottom: 1rem;
-      padding: 0.6rem;
+    input[type=file], button {
+      margin: 1rem 0;
+      padding: 0.6rem 1.5rem;
       font-size: 1rem;
-      border-radius: 10px;
+      border-radius: 8px;
       border: none;
-      color: #333;
+      cursor: pointer;
     }
     button {
-      margin: 0.5rem;
-      padding: 0.8rem 1.5rem;
-      font-size: 1rem;
-      font-weight: bold;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, #43e97b, #38f9d7);
+      background: #ff6a88;
       color: white;
-      cursor: pointer;
       transition: all 0.3s ease;
     }
     button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 4px 12px rgba(255,255,255,0.2);
+      background: #ff3e66;
     }
-    #result {
-      white-space: pre-wrap;
-      background: rgba(255, 255, 255, 0.1);
+    pre {
+      background: #222;
+      color: #eee;
       padding: 1rem;
-      border-radius: 12px;
-      width: 95%;
-      max-width: 900px;
-      margin-top: 1rem;
+      max-width: 100%;
       overflow-x: auto;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      background: #4caf50;
+      margin-top: 0.5rem;
     }
     @media (max-width: 768px) {
-      body { padding: 1rem; font-size: 16px; }
-      h1 { font-size: 1.5rem; text-align: center; }
+      body { padding: 1rem; }
+      h1 { font-size: 1.5rem; }
     }
   </style>
 </head>
 <body>
-  <h1>🚀 超酷 JS 自动生成器</h1>
-  <input type="file" id="xlsxFile" accept=".xlsx" />
-  <div>
-    <button onclick="handleGenerate()">🔥 生成 JS</button>
-    <button onclick="copyJS()">📋 复制 JS</button>
-  </div>
-  <div id="result">// 👇 生成的 JS 会显示在这里</div>
+  <h1>ポケモン自動填表 JS 生成器</h1>
+
+  <input type="file" id="xlsxInput" accept=".xlsx" />
+  <button onclick="generateJS()">🚀 生成 JS</button>
+  <button class="copy-btn" onclick="copyJS()">📋 复制代码</button>
+
+  <pre id="output"></pre>
 
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script>
-    const generatePhone = () => {
-      const prefix = ['070', '080', '090'][Math.floor(Math.random() * 3)];
-      return prefix + Array.from({length: 8}, () => Math.floor(Math.random() * 10)).join('');
-    };
-    const randomStr = (len) => {
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-      return Array.from({length: len}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    };
+    let globalUserData = [];
 
-    async function handleGenerate() {
-      const fileInput = document.getElementById('xlsxFile');
-      const resultDiv = document.getElementById('result');
-      if (!fileInput.files.length) return alert('请先上传xlsx文件');
-      const file = fileInput.files[0];
+    document.getElementById('xlsxInput').addEventListener('change', async function (e) {
+      const file = e.target.files[0];
+      if (!file) return alert('请上传 Excel 文件');
       const data = await file.arrayBuffer();
-      const wb = XLSX.read(data);
-      const json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-      const userData = json.map(row => ({
-        email: row.email,
+      const workbook = XLSX.read(data);
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const json = XLSX.utils.sheet_to_json(sheet);
+
+      globalUserData = json.map(row => ({
+        email: row.email || '',
         rowpassword: row.rowpassword || 'Abc1234.',
-        name: row.name,
-        kana: row.kana,
-        phone: row.phone || generatePhone(),
-        birthday: row.birthday,
-        postal: row.postal,
-        myAddress: row.myAddress,
-        gender: row.gender,
-        nickname: randomStr(5)
+        name: row.name || '',
+        kana: row.kana || '',
+        phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
+        birthday: String(row.birthday || '19900101'),
+        postal: row.postal || '',
+        myAddress: `${row.myAddress1 || ''} ${row.myAddress2 || ''}`.trim(),
+        gender: row.gender || 'どちらも選ばない'
       }));
 
-      const response = await fetch('./demo.js');
-      let demoText = await response.text();
-      demoText = demoText.replace(
-        /\/\/ USERDATA_PLACEHOLDER[^\n]*\nconst userData = \[[\s\S]*?\];/,
-        '// USERDATA_PLACEHOLDER\nconst userData = ' + JSON.stringify(userData, null, 2) + ';'
-      );
-      resultDiv.textContent = demoText;
+      alert('✅ 数据读取成功！点击生成 JS');
+    });
+
+    async function generateJS() {
+      const res = await fetch('./demo.js');
+      let jsText = await res.text();
+      if (!globalUserData.length) return alert('请先上传 Excel 文件');
+
+      const dataBlock = `// USERDATA_START\nconst userData = ${JSON.stringify(globalUserData, null, 2)};\n// USERDATA_END`;
+      jsText = jsText.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, dataBlock);
+      document.getElementById('output').textContent = jsText;
     }
 
     function copyJS() {
-      const content = document.getElementById('result').textContent;
-      navigator.clipboard.writeText(content).then(() => alert('已复制'));
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ 已复制到剪贴板');
+      });
     }
   </script>
 </body>
