@@ -44,6 +44,21 @@
     <div id="userDataDisplay"></div>
 
     <script>
+
+
+        function copyToClipboard() {
+            const text = document.getElementById('userDataDisplay').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('油猴脚本已复制到剪贴板!');
+        }
+
+        document.getElementById('file-input').addEventListener('change', handleFile);
+        
         function handleFile(event) {
             const file = event.target.files[0];
             const reader = new FileReader();
