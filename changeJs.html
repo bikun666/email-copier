@@ -3,755 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel 数据转为 UserData</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <title>Tool Library - GitHub</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
         }
-        #userDataDisplay {
-            margin-top: 20px;
-            background-color: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            white-space: pre-wrap; /* 保持格式 */
+        .container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 2.5rem;
+            color: #4CAF50;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.1);
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            margin: 15px 0;
+        }
+        a {
+            text-decoration: none;
+            color: #ffffff;
+            background: #4CAF50;
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 6px;
+            transition: background 0.3s ease;
+            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        a:hover {
+            background: #45a049;
+        }
+        a:active {
+            background: #388e3c;
+        }
+        a:focus {
+            outline: none;
+        }
+        footer {
+            margin-top: 30px;
             font-size: 14px;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-        button:hover {
-            background-color: #45a049;
+            color: #777;
         }
     </style>
 </head>
 <body>
-
-    <h1>Excel 数据转为 JavaScript 数组并替换油猴脚本</h1>
-
-    <input type="file" id="file-input" accept=".xlsx" />
-    <button onclick="copyToClipboard()">复制油猴脚本</button>
-
-    <div id="userDataDisplay"></div>
-
-    <script>
-
-
-        function copyToClipboard() {
-            const text = document.getElementById('userDataDisplay').innerText;
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('油猴脚本已复制到剪贴板!');
-        }
-
-        document.getElementById('file-input').addEventListener('change', handleFile);
-        
-        function handleFile(event) {
-            const file = event.target.files[0];
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = e.target.result;
-                const workbook = XLSX.read(data, {type: 'binary'});
-                const firstSheet = workbook.Sheets[workbook.SheetNames[0]]; // 只选择第一个sheet
-                const jsonData = XLSX.utils.sheet_to_json(firstSheet); // 将第一个sheet转为JSON数据
-                processData(jsonData);
-            };
-            reader.readAsBinaryString(file);
-        }
-
-        function processData(data) {
-            const userData = data.map(row => {
-                // 如果 email 为空，则跳过这一行
-                if (!row["email"]) return null;
-
-                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
-            }).filter(row => row !== null);  // 过滤掉 email 为空的行
-
-            displayUserData(userData);
-        }
- 
-        function displayUserData(userData) {
-            const userDataDisplay = document.getElementById('userDataDisplay');
-            const updatedScript = generateUpdatedScript(userData);
-            userDataDisplay.innerHTML = `<pre>${updatedScript}</pre>`;
-        }
-
-        function generateUpdatedScript(userData) {
-            const scriptTemplate =  `// ==UserScript==
-// @name kunポケモンセンター会員登録自動化助手 (接单) - 完整增强版
-// @namespace http://tampermonkey.net/
-// @version 3.6
-// @description 自动填写会员登录表单 - 增强版（所有按钮都在左侧）
-// @author CHEN BIKUN
-// @match *://www.pokemoncenter-online.com/new-customer/*
-// @grant none
-// ==/UserScript==
-
-(function() {
-    'use strict';
-
-    console.log('[会员注册助手] 🚀 脚本启动 (完整增强版 v3.6)');
-
-    // 用户数据
-const userData = ${JSON.stringify(userData, null, 2)};
-
-     // 存储当前选中的用户索引
-    let currentUserIndex = null;
-
-    // 辅助函数：生成随机字符串
-    function generateRandomString(length) {
-        const chars = 'abcdefghijklmnopqrstuvwxyz';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-            result += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return result;
-    }
-
-    // 辅助函数：生成随机电话号码
-    function generateRandomPhone() {
-        const prefixes = ['090', '080', '070'];
-        const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-        const number = Math.floor(Math.random() * 90000000 + 10000000);
-        return prefix + number;
-    }
-
-    // 辅助函数：设置输入框的值
-    function setInputValue(element, value) {
-        if (element) {
-            element.value = value;
-            element.dispatchEvent(new Event('input', { bubbles: true }));
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    }
-
-    // 辅助函数：设置下拉框的值
-    function setSelectValue(element, value) {
-        if (element) {
-            element.value = value;
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    }
-
-    // 辅助函数：设置复选框
-    function setCheckbox(element, checked) {
-        if (element) {
-            element.checked = checked;
-            element.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-    }
-
-    // 辅助函数：设置单选按钮
-    function setRadio(value) {
-        const radios = document.querySelectorAll('input[type="radio"][name="dwfrm_profile_customer_emailsignup"]');
-        radios.forEach(radio => {
-            if (radio.value === value) {
-                radio.checked = true;
-                radio.dispatchEvent(new Event('change', { bubbles: true }));
-            }
-        });
-    }
-
-    // 辅助函数：模拟按键
-    function simulateKeyPress(element, key) {
-        const event = new KeyboardEvent('keydown', {
-            key: key,
-            code: key,
-            bubbles: true,
-            cancelable: true
-        });
-        element.dispatchEvent(event);
-
-        // 也触发 keyup 事件
-        const keyupEvent = new KeyboardEvent('keyup', {
-            key: key,
-            code: key,
-            bubbles: true,
-            cancelable: true
-        });
-        element.dispatchEvent(keyupEvent);
-    }
-
-    // 地址转换函数
-    function addressChange(address) {
-        const toFullWidthNumber = (num) => num.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
-
-        const toKanjiNumber = (num) => {
-            const kanjiDigits = ['〇','一','二','三','四','五','六','七','八','九'];
-            const n = parseInt(num, 10);
-            if (isNaN(n)) return num;
-
-            if (n === 0) return '〇';
-            if (n <= 10) {
-                if (n === 10) return '十';
-                return kanjiDigits[n];
-            }
-
-            if (n >= 11 && n <= 19) {
-                return '十' + kanjiDigits[n - 10];
-            }
-
-            if (n >= 20 && n <= 99) {
-                const tens = Math.floor(n / 10);
-                const ones = n % 10;
-                let result = kanjiDigits[tens] + '十';
-                if (ones > 0) {
-                    result += kanjiDigits[ones];
-                }
-                return result;
-            }
-
-            return num.split('').map(d => kanjiDigits[parseInt(d)]).join('');
-        };
-
-        const [chome, ban, go] = address.split(/[-ー−]/);
-        if ([chome, ban, go].includes(undefined)) return address;
-
-        const chomeVariants = [
-            chome + "丁目",
-            toFullWidthNumber(chome) + "ちょうめ",
-            toFullWidthNumber(chome) + "チョウメ",
-            toKanjiNumber(chome) + "丁目"
-        ];
-
-        const banVariants = [
-            ban + "番",
-            toFullWidthNumber(ban) + "ばん",
-            toFullWidthNumber(ban) + "バン",
-            toKanjiNumber(ban) + "番"
-        ];
-
-        const goVariants = [
-            go + "号",
-            toFullWidthNumber(go) + "ごう",
-            toFullWidthNumber(go) + "ゴウ",
-            toKanjiNumber(go) + "号"
-        ];
-
-        while (true) {
-            const chomeStr = chomeVariants[Math.floor(Math.random() * chomeVariants.length)];
-            const banStr = banVariants[Math.floor(Math.random() * banVariants.length)];
-            const goStr = goVariants[Math.floor(Math.random() * goVariants.length)];
-
-            const useDash1 = Math.random() < 0.5;
-            const useDash2 = Math.random() < 0.5;
-
-            if (useDash1 && banStr === "一番") continue;
-            if (useDash2 && goStr === "一号") continue;
-
-            let result = chomeStr;
-            result += useDash1 ? "-" : "";
-            result += banStr;
-            result += useDash2 ? "-" : "";
-            result += goStr;
-
-            return result;
-        }
-    }
-
-    // 获取性别对应的值
-    function getGenderValue(gender) {
-        const genderMap = {
-            '男性': '1',
-            '女性': '2',
-            'どちらも選ばない': '9'
-        };
-        return genderMap[gender] || '9';
-    }
-
-    // 改进的获取用户数据函数
-    function getUserDataFromEmail() {
-        // 如果已经通过选择器选择了用户，直接返回
-        if (currentUserIndex !== null && userData[currentUserIndex]) {
-            console.log('[会员注册助手] 📋 使用选择器选中的用户:', userData[currentUserIndex].name);
-            return userData[currentUserIndex];
-        }
-
-        // 尝试多个可能的邮箱输入框选择器
-        const emailSelectors = [
-            'input[type="email"]',
-            'input[name="dwfrm_profile_login_email"]',
-            'input[name*="email"]',
-            '#registration-form-email'
-        ];
-
-        let emailInput = null;
-        let emailValue = null;
-
-        // 尝试找到邮箱输入框
-        for (const selector of emailSelectors) {
-            emailInput = document.querySelector(selector);
-            if (emailInput && emailInput.value) {
-                emailValue = emailInput.value.trim();
-                break;
-            }
-        }
-
-        console.log('[会员注册助手] 📧 当前邮箱值:', emailValue || '未找到');
-
-        if (emailValue) {
-            const foundUser = userData.find(user => user.email.toLowerCase() === emailValue.toLowerCase());
-            if (foundUser) {
-                console.log('[会员注册助手] ✅ 找到匹配用户:', foundUser.name);
-                return foundUser;
-            } else {
-                console.log('[会员注册助手] ⚠️ 未找到匹配的用户数据');
-            }
-        }
-
-        // 如果没有找到邮箱或匹配的数据，返回第一个用户数据作为默认值
-        console.log('[会员注册助手] ℹ️ 使用默认用户数据');
-        return userData[0];
-    }
-
-    // 填充表单
-    async function autoFillForm() {
-        console.log('[会员注册助手] 开始自动填充表单');
-
-        // 获取用户数据
-        const selectedUserData = getUserDataFromEmail();
-
-        if (!selectedUserData) {
-            console.error('[会员注册助手] ❌ 无可用的用户数据');
-            alert('未找到用户数据，请检查邮箱是否正确输入');
-            return;
-        }
-
-        // 显示当前使用的数据
-        console.log('[会员注册助手] 📋 使用的用户数据:', {
-            email: selectedUserData.email,
-            name: selectedUserData.name
-        });
-
-        try {
-            // 1. 填充ニックネーム (随机5个字母)
-            const nickname = generateRandomString(5);
-            const nicknameInput = document.getElementById('registration-form-nname');
-            setInputValue(nicknameInput, nickname);
-            console.log('[会员注册助手] ✅ ニックネーム:', nickname);
-
-            // 2. 填充姓名
-            const nameInput = document.getElementById('registration-form-fname');
-            setInputValue(nameInput, selectedUserData.name);
-            console.log('[会员注册助手] ✅ 姓名:', selectedUserData.name);
-
-            // 3. 填充フリガナ
-            const kanaInput = document.getElementById('registration-form-kana');
-            setInputValue(kanaInput, selectedUserData.kana);
-            console.log('[会员注册助手] ✅ フリガナ:', selectedUserData.kana);
-
-            // 4. 填充生年月日
-            const birthday = selectedUserData.birthday;
-            const year = birthday.substring(0, 4);
-            const month = birthday.substring(4, 6);
-            const day = birthday.substring(6, 8);
-
-            const yearSelect = document.getElementById('registration-form-birthdayyear');
-            const monthSelect = document.getElementById('registration-form-birthdaymonth');
-            const daySelect = document.getElementById('registration-form-birthdayday');
-
-            setSelectValue(yearSelect, year);
-            setSelectValue(monthSelect, month);
-            setSelectValue(daySelect, day);
-            console.log('[会员注册助手] ✅ 生年月日:', year, month, day);
-
-            // 5. 设置性别
-            const genderSelect = document.querySelector('select[name="dwfrm_profile_customer_gender"]');
-            const genderValue = getGenderValue(selectedUserData.gender);
-            setSelectValue(genderSelect, genderValue);
-            console.log('[会员注册助手] ✅ 性別:', selectedUserData.gender || 'どちらも選ばない', '(值:', genderValue, ')');
-
-            // 6. 处理地址 - 使用 addressChange 转换 myAddress1
-            const transformedAddress1 = addressChange(selectedUserData.myAddress1);
-            console.log('[会员注册助手] 📍 地址转换: ', selectedUserData.myAddress1, ' -> ', transformedAddress1);
-
-            // 7. 填充密码
-            const passwordInput = document.querySelector('input[name="dwfrm_profile_login_password"]');
-            const passwordConfirmInput = document.querySelector('input[name="dwfrm_profile_login_passwordconfirm"]');
-            setInputValue(passwordInput, selectedUserData.rowpassword);
-            setInputValue(passwordConfirmInput, selectedUserData.rowpassword);
-            console.log('[会员注册助手] ✅ パスワード:', selectedUserData.rowpassword);
-
-            // 8. 填充邮箱
-            const emailInput = document.querySelector('input[name="dwfrm_profile_login_email"]');
-            setInputValue(emailInput, selectedUserData.email);
-            console.log('[会员注册助手] ✅ 邮箱:', selectedUserData.email);
-
-            // 9. 填充电话
-            const phoneNumber = selectedUserData.phone || generateRandomPhone();
-            const phoneInput = document.querySelector('input[type="tel"]') ||
-                              document.querySelector('input[name*="phone"]') ||
-                              document.getElementById('registration-form-phone');
-            if (phoneInput) {
-                setInputValue(phoneInput, phoneNumber);
-                console.log('[会员注册助手] ✅ 电话:', phoneNumber, selectedUserData.phone ? '(使用提供的号码)' : '(随机生成)');
-            }
-
-            // 10. 填充邮政编码
-            const postcodeInput = document.getElementById('registration-form-postcode');
-            setInputValue(postcodeInput, selectedUserData.postal);
-            console.log('[会员注册助手] ✅ 郵便番号:', selectedUserData.postal);
-
-            // 11. 先填充番地和建物名（第一次）
-            const addressInput = document.getElementById('registration-form-address-line1');
-            setInputValue(addressInput, transformedAddress1);
-            console.log('[会员注册助手] ✅ 番地:', transformedAddress1);
-
-            // 12. 填充建物名・部屋番号 (使用 myAddress2)
-            const buildingInput = document.getElementById('registration-form-address-line2');
-            setInputValue(buildingInput, selectedUserData.myAddress2);
-            console.log('[会员注册助手] ✅ 建物名・部屋番号:', selectedUserData.myAddress2);
-
-            // 13. 设置メールマガジンを"受け取らない"
-            setRadio('false');
-            console.log('[会员注册助手] ✅ メールマガジン: 受け取らない');
-
-            // 14. 勾选同意条款
-            const termsCheckbox = document.getElementById('terms');
-            const privacyCheckbox = document.getElementById('privacyPolicy');
-            setCheckbox(termsCheckbox, true);
-            setCheckbox(privacyCheckbox, true);
-            console.log('[会员注册助手] ✅ 利用規約とプライバシーポリシーに同意');
-
-            // 15. 滚动到郵便番号并选中，然后模拟右方向键
-            if (postcodeInput) {
-                // 先等待一下让页面稳定
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                // 滚动到邮政编码输入框
-                postcodeInput.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'center',
-                    inline: 'nearest'
-                });
-
-                // 等待滚动完成
-                await new Promise(resolve => setTimeout(resolve, 800));
-
-                // 聚焦并选中
-                postcodeInput.focus();
-                postcodeInput.select();
-
-                // 高亮显示（临时）
-                const originalBorder = postcodeInput.style.border;
-                postcodeInput.style.border = '3px solid #ff0000';
-                postcodeInput.style.boxShadow = '0 0 10px rgba(255,0,0,0.5)';
-
-                console.log('[会员注册助手] ✅ 已滚动到郵便番号并选中');
-
-                // 等待一下再按右键
-                await new Promise(resolve => setTimeout(resolve, 300));
-
-                // 模拟按下右方向键
-                simulateKeyPress(postcodeInput, 'ArrowRight');
-                console.log('[会员注册助手] ✅ 模拟按下右方向键');
-
-                // 等待1秒
-                await new Promise(resolve => setTimeout(resolve, 1000));
-
-                // 恢复原始边框
-                postcodeInput.style.border = originalBorder;
-                postcodeInput.style.boxShadow = '';
-
-                // 重新填充番地（如果需要）
-                if (addressInput) {
-                    setInputValue(addressInput, transformedAddress1);
-                    console.log('[会员注册助手] ✅ 重新填充番地:', transformedAddress1);
-                }
-            }
-
-            console.log('[会员注册助手] 🎉 所有字段填充完成');
-
-        } catch (error) {
-            console.error('[会员注册助手] ❌ 填充过程中出错:', error);
-        }
-    }
-
-    // 创建用户选择器
-    function createUserSelector() {
-        const selectorContainer = document.createElement('div');
-        selectorContainer.style.cssText = `
-            position: fixed;
-            left: 20px;
-            top: 20px;
-            z-index: 10000;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        `;
-
-        const label = document.createElement('label');
-        label.textContent = '选择用户：';
-        label.style.cssText = `
-            font-size: 14px;
-            font-weight: bold;
-            margin-right: 10px;
-        `;
-
-        const selector = document.createElement('select');
-        selector.style.cssText = `
-            padding: 5px 10px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 2px solid #667eea;
-            background: white;
-            cursor: pointer;
-        `;
-
-        // 添加默认选项
-        const defaultOption = document.createElement('option');
-        defaultOption.value = '';
-        defaultOption.textContent = '-- 自动匹配 --';
-        selector.appendChild(defaultOption);
-
-        // 添加用户选项
-        userData.forEach((user, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = `${user.name} (${user.email})`;
-            selector.appendChild(option);
-        });
-
-        // 选择变化时更新当前用户索引
-        selector.onchange = function() {
-            if (this.value === '') {
-                currentUserIndex = null;
-                console.log('[会员注册助手] 📋 切换到自动匹配模式');
-            } else {
-                currentUserIndex = parseInt(this.value);
-                const selectedUser = userData[currentUserIndex];
-                console.log('[会员注册助手] 📋 手动选择用户:', selectedUser.name);
-
-                // 自动填充邮箱
-                const emailInput = document.querySelector('input[type="email"]') ||
-                                  document.querySelector('input[name="dwfrm_profile_login_email"]');
-                if (emailInput) {
-                    setInputValue(emailInput, selectedUser.email);
-                }
-            }
-        };
-
-        selectorContainer.appendChild(label);
-        selectorContainer.appendChild(selector);
-        document.body.appendChild(selectorContainer);
-        console.log('[会员注册助手] ✅ 用户选择器已添加');
-    }
-
-    // 创建自动填充表单按钮
-    function createFillFormButton() {
-        const button = document.createElement('button');
-        button.textContent = '🚀 自动填充表单';
-        button.type = 'button';
-        button.style.cssText = `
-            position: fixed;
-            left: 20px;
-            top: 45%;
-            transform: translateY(-50%);
-            z-index: 10000;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            min-width: 180px;
-        `;
-
-        button.onmouseover = () => {
-            button.style.transform = 'translateY(-50%) scale(1.05)';
-            button.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)';
-        };
-
-        button.onmouseout = () => {
-            button.style.transform = 'translateY(-50%) scale(1)';
-            button.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        };
-
-        button.onclick = async () => {
-            button.textContent = '⏳ 填充中...';
-            button.disabled = true;
-
-            try {
-                await autoFillForm();
-                button.textContent = '✅ 完成';
-                button.style.background = 'linear-gradient(135deg, #4caf50 0%, #45a049 100%)';
-
-                setTimeout(() => {
-                    button.textContent = '🚀 自动填充表单';
-                    button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    button.disabled = false;
-                }, 2000);
-            } catch (error) {
-                button.textContent = '❌ 错误';
-                button.style.background = 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)';
-
-                setTimeout(() => {
-                    button.textContent = '🚀 自动填充表单';
-                    button.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
-                    button.disabled = false;
-                }, 3000);
-            }
-        };
-
-        document.body.appendChild(button);
-        console.log('[会员注册助手] ✅ 填表单按钮已添加');
-    }
-
-    // 创建确认按钮（原来的右侧按钮，现在放在左侧）
-    function createConfirmButton() {
-        const confirmButton = document.createElement('button');
-        confirmButton.textContent = '✔️ 确认进む';
-        confirmButton.type = 'button';
-        confirmButton.style.cssText = `
-            position: fixed;
-            left: 20px;
-            top: 55%;
-            transform: translateY(-50%);
-            z-index: 10000;
-            padding: 15px 30px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.3s ease;
-            min-width: 180px;
-        `;
-
-        confirmButton.onmouseover = () => {
-            confirmButton.style.transform = 'translateY(-50%) scale(1.05)';
-            confirmButton.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)';
-        };
-
-        confirmButton.onmouseout = () => {
-            confirmButton.style.transform = 'translateY(-50%) scale(1)';
-            confirmButton.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-        };
-
-        confirmButton.onclick = () => {
-            // 查找提交按钮
-            const submitButton = document.querySelector('input[type="submit"][value="入力内容確認へ進む"]') ||
-                               document.querySelector('button[type="submit"]') ||
-                               document.querySelector('input[type="submit"]') ||
-                               document.querySelector('button.submit') ||
-                               document.querySelector('.submit-button');
-
-            if (submitButton) {
-                submitButton.click();
-                console.log('[会员注册助手] ✅ 已模拟点击"入力内容確認へ進む"按钮');
-
-                const notification = document.createElement('div');
-                notification.textContent = '已点击确认按钮！';
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 50px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    background-color: #4CAF50;
-                    color: white;
-                    padding: 15px 30px;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    font-weight: bold;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-                    z-index: 100000;
-                    animation: slideIn 0.3s ease;
-                `;
-
-                document.body.appendChild(notification);
-
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    notification.style.transition = 'opacity 0.5s';
-                    setTimeout(() => notification.remove(), 500);
-                }, 2000);
-            } else {
-                alert('未找到"入力内容確認へ進む"按钮');
-                console.error('[会员注册助手] ❌ 未找到提交按钮');
-            }
-        };
-
-        document.body.appendChild(confirmButton);
-        console.log('[会员注册助手] ✅ 确认按钮已添加');
-    }
-
-    // 添加动画样式
-    function addAnimationStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from {
-                    top: -100px;
-                    opacity: 0;
-                }
-                to {
-                    top: 50px;
-                    opacity: 1;
-                }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    // 初始化
-    function init() {
-        setTimeout(() => {
-            addAnimationStyles();
-            createUserSelector();
-            createFillFormButton();
-            createConfirmButton();  // 创建确认按钮
-        }, 1000);
-    }
-
-    // 页面加载完成后运行
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-
-    console.log('[会员注册助手] ✅ 脚本加载完成 (完整增强版 v3.6)');
-
-})();
-`;
-
-            return scriptTemplate;
-        }
-
-        function copyToClipboard() {
-            const text = document.getElementById('userDataDisplay').innerText;
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            alert('油猴脚本已复制到剪贴板!');
-        }
-
-        document.getElementById('file-input').addEventListener('change', handleFile);
-    </script>
-
+    <div class="container">
+        <h1>GitHub Tool Library</h1>
+        <ul>
+            <li><a href="https://bikun666.github.io/myTools/changeJs.html" target="_blank">changeJs.html</a></li>
+            <li><a href="https://bikun666.github.io/myTools/demo.js" target="_blank">demo.js</a></li>
+            <li><a href="https://bikun666.github.io/myTools/editorData.html" target="_blank">editorData.html</a></li>
+            <li><a href="https://bikun666.github.io/myTools/getEmail.html" target="_blank">getEmail.html</a></li>
+            <li><a href="https://bikun666.github.io/myTools/sakura.html" target="_blank">sakura.html</a></li>
+            <li><a href="https://bikun666.github.io/myTools/sakuraEditor.html" target="_blank">sakuraEditor.html</a></li>
+            <li><a href="https://bikun666.github.io/myTools/test.html" target="_blank">test.html</a></li>
+        </ul>
+        <footer>
+            <p>Created with ❤️ by <a href="https://github.com/bikun666" target="_blank">bikun666</a></p>
+        </footer>
+    </div>
 </body>
 </html>
