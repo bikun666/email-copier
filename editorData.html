@@ -1,247 +1,88 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ポケモン JS 生成器</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: radial-gradient(circle at top, #2d033b, #810ca8, #cd5888);
-      color: #eee;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-    }
-    h1 {
-      font-size: 2.3rem;
-      color: #ffeaa7;
-      text-shadow: 0 0 10px #fffa65, 0 0 20px #f6e58d;
-      margin-bottom: 1rem;
-    }
-    #message {
-      margin-top: 0.5rem;
-      color: #fab1a0;
-      font-weight: bold;
-      font-size: 1rem;
-    }
-    input[type=file], button {
-      margin: 1rem 0.5rem;
-      padding: 0.8rem 1.6rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button {
-      background: linear-gradient(135deg, #fd79a8, #e84393);
-      color: white;
-    }
-    button:hover {
-      box-shadow: 0 0 10px #ffeaa7;
-      transform: scale(1.05);
-    }
-    .copy-btn {
-      background: linear-gradient(135deg, #55efc4, #00cec9);
-    }
-    pre {
-      width: 100%;
-      max-width: 1000px;
-      background: #1e1e2f;
-      color: #f3f3f3;
-      padding: 1rem;
-      border-radius: 12px;
-      overflow-x: auto;
-      margin-top: 2rem;
-      white-space: pre-wrap;
-      font-size: 0.85rem;
-      box-shadow: 0 0 10px rgba(0,255,255,0.3);
-    }
-    @media (max-width: 768px) {
-      h1 { font-size: 1.5rem; }
-      pre { font-size: 0.75rem; }
-      input, button { width: 90%; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel 数据转为 UserData</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        #userDataDisplay {
+            margin-top: 20px;
+            background-color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap; /* 保持格式 */
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
 
-  <h1>🌸 ポケモン JS 生成器</h1>
-  <div id="message">请上传 Excel 文件</div>
+    <h1>Excel 数据转为 JavaScript 数组</h1>
 
-  <input type="file" id="xlsxInput" accept=".xlsx" />
-  <button onclick="generateJS()">🚀 生成 JS</button>
-  <button class="copy-btn" onclick="copyJS()">📋 复制</button>
+    <input type="file" id="file-input" accept=".xlsx" />
+    <button onclick="copyToClipboard()">复制数据</button>
 
-  <pre id="output">// 请上传 Excel 文件并点击生成</pre>
+    <div id="userDataDisplay"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-  <script>
-    const templateJS = `// ==UserScript==
-// @name         ポケモンセンター会員登録自動化助手 (精简版)
-// @namespace    http://tampermonkey.net/
-// @version      1.0
-// @description  自动填写注册表单（来自HTML注入userData）
-// @match        *://www.pokemoncenter-online.com/new-customer/*
-// @grant        none
-// ==/UserScript==
+    <script>
+        function handleFile(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = e.target.result;
+                const workbook = XLSX.read(data, {type: 'binary'});
+                const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                processData(jsonData);
+            };
+            reader.readAsBinaryString(file);
+        }
 
-(function () {
-  'use strict';
+        function processData(data) {
+            const userData = data.map(row => {
+                return `{"email": "${row["email"] || ""}", "rowpassword": "${row["rowpassword"] || "Abc1234."}", "name": "${row["name"] || ""}", "kana": "${row["kana"] || ""}", "phone": "${row["phone"] || ""}", "birthday": "${row["birthday"] || ""}", "postal": "${row["postal"] || ""}", "myAddress1": "${row["myAddress1"] || ""}", "myAddress2": "${row["myAddress2"] || ""}", "gender": "${row["gender"] || "どちらも選ばない"}"}`;
+            });
 
-  // USERDATA_START
-const userData = [];
-// USERDATA_END
+            displayUserData(userData);
+        }
 
-  const generateRandomString = (length) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-  };
+        function displayUserData(userData) {
+            const userDataDisplay = document.getElementById('userDataDisplay');
+            let htmlContent = `const userData = [\n${userData.join(",\n")}\n];`;
+            userDataDisplay.innerHTML = `<pre>${htmlContent}</pre>`;
+        }
 
-  const setInputValue = (el, val) => {
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('input', { bubbles: true }));
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-    el.dispatchEvent(new Event('blur', { bubbles: true }));
-  };
+        function copyToClipboard() {
+            const text = document.getElementById('userDataDisplay').innerText;
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('数据已复制到剪贴板!');
+        }
 
-  const setSelectValue = (el, val) => {
-    if (!el) return;
-    el.value = val;
-    el.dispatchEvent(new Event('change', { bubbles: true }));
-  };
-
-  const setCheckbox = (el, checked = true) => {
-    if (el && el.checked !== checked) {
-      el.checked = checked;
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  };
-
-  const setRadio = (value) => {
-    const radios = document.querySelectorAll(\`input[type="radio"][value="\${value}"]\`);
-    radios.forEach(radio => {
-      if (!radio.checked) {
-        radio.checked = true;
-        radio.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    });
-  };
-
-  const findUserByEmail = (email) => userData.find(u => u.email === email);
-
-  async function autoFillForm() {
-    const emailInput = document.querySelector('input[type="email"]') || document.querySelector('input[name*="email"]');
-    if (!emailInput || !emailInput.value) return;
-    const user = findUserByEmail(emailInput.value);
-    if (!user) return;
-
-    setInputValue(document.getElementById('registration-form-nname'), user.nickname || generateRandomString(5));
-    setInputValue(document.getElementById('registration-form-fname'), user.name);
-    setInputValue(document.getElementById('registration-form-kana'), user.kana);
-    setSelectValue(document.getElementById('registration-form-birthdayyear'), String(user.birthday).slice(0, 4));
-    setSelectValue(document.getElementById('registration-form-birthdaymonth'), String(user.birthday).slice(4, 6));
-    setSelectValue(document.getElementById('registration-form-birthdayday'), String(user.birthday).slice(6, 8));
-    setInputValue(document.getElementById('registration-form-phone'), user.phone);
-    setSelectValue(document.querySelector('select[name="dwfrm_profile_customer_gender"]'), user.gender);
-    setInputValue(document.getElementById('registration-form-address-line1'), user.myAddress);
-    setInputValue(document.getElementById('registration-form-address-line2'), user.myAddress);
-    setInputValue(document.getElementById('registration-form-postcode'), user.postal);
-    setInputValue(document.querySelector('input[name="dwfrm_profile_login_password"]'), user.rowpassword);
-    setInputValue(document.querySelector('input[name="dwfrm_profile_login_passwordconfirm"]'), user.rowpassword);
-    setRadio('false');
-    setCheckbox(document.getElementById('terms'), true);
-    setCheckbox(document.getElementById('privacyPolicy'), true);
-  }
-
-  function init() {
-    const btn = document.createElement('button');
-    btn.textContent = '🚀 填表';
-    Object.assign(btn.style, {
-      position: 'fixed', top: '50%', left: '10px', transform: 'translateY(-50%)',
-      zIndex: 9999, padding: '10px 20px', background: '#fd79a8', color: '#fff', border: 'none', borderRadius: '8px',
-      fontWeight: 'bold', cursor: 'pointer'
-    });
-    btn.onclick = autoFillForm;
-    document.body.appendChild(btn);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
-  }
-})();`;
-
-    function message(text) {
-      document.getElementById('message').textContent = text;
-    }
-
-    function addressChange(address) {
-      const toFullWidth = s => s.replace(/[0-9]/g, d => String.fromCharCode(d.charCodeAt(0) + 0xFF10 - 0x30));
-      const toKanji = s => {
-        const k = ['〇','一','二','三','四','五','六','七','八','九'];
-        return s.split('').map(d => k[+d] || d).join('');
-      };
-      const [chome, ban, go] = address.split(/[-ー−]/);
-      if (!chome || !ban || !go) return address;
-      const c = [chome + '丁目', toFullWidth(chome) + 'ちょうめ', toKanji(chome) + '丁目'];
-      const b = [ban + '番', toFullWidth(ban) + 'ばん', toKanji(ban) + '番'];
-      const g = [go + '号', toFullWidth(go) + 'ごう', toKanji(go) + '号'];
-      return c[Math.floor(Math.random()*c.length)] +
-             (Math.random()<0.5 ? '-' : '') +
-             b[Math.floor(Math.random()*b.length)] +
-             (Math.random()<0.5 ? '-' : '') +
-             g[Math.floor(Math.random()*g.length)];
-    }
-
-    let userData = [];
-
-    document.getElementById('xlsxInput').addEventListener('change', async function (e) {
-      const file = e.target.files[0];
-      if (!file) return message('❌ 未选择文件');
-      const data = await file.arrayBuffer();
-      const wb = XLSX.read(data);
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json(sheet);
-
-      userData = json
-        .filter(row => row.email)
-        .map(row => ({
-          email: row.email,
-          rowpassword: row.rowpassword || 'Abc1234.',
-          name: row.name || '',
-          kana: row.kana || '',
-          phone: row.phone || '090' + Math.floor(10000000 + Math.random() * 90000000),
-          birthday: String(row.birthday || '19900101'),
-          postal: row.postal || '',
-          myAddress: `${addressChange(row.myAddress1 || '')} ${row.myAddress2 || ''}`.trim(),
-          gender: row.gender || 'どちらも選ばない'
-        }));
-
-      message(`✅ 读取 ${userData.length} 条有效数据`);
-    });
-
-    function generateJS() {
-      if (!userData.length) return message('❌ 请先上传 Excel 文件');
-      const oneLine = userData.map(obj => JSON.stringify(obj)).join(',\n');
-      const block = `// USERDATA_START\nconst userData = [\n${oneLine}\n];\n// USERDATA_END`;
-      const final = templateJS.replace(/\/\/ USERDATA_START[\s\S]*?\/\/ USERDATA_END/, block);
-      document.getElementById('output').textContent = final;
-      message('✅ JS 已生成');
-    }
-
-    function copyJS() {
-      const text = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        message('✅ 已复制到剪贴板');
-      });
-    }
-  </script>
+        document.getElementById('file-input').addEventListener('change', handleFile);
+    </script>
 
 </body>
 </html>
