@@ -204,6 +204,36 @@
     }
 
     loadData();
+    
   </script>
+      <script>
+      // 等待DOM完全加载后执行
+      document.addEventListener('DOMContentLoaded', function() {
+        // 创建响应式样式
+        const style = document.createElement('style');
+        style.textContent = `
+          .verification-br {
+            display: none;
+          }
+
+          @media (max-width: 768px) {
+            .verification-br {
+              display: inline;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+
+        // 查找并标记目标<br>标签
+        document.querySelectorAll('span').forEach(span => {
+          if (span.textContent.includes('验证码：')) {
+            const brTags = span.querySelectorAll('br');
+            brTags.forEach(br => {
+              br.classList.add('verification-br');
+            });
+          }
+        });
+      });
+    </script>
 </body>
 </html>
