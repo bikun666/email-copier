@@ -4,590 +4,119 @@
   <meta charset="UTF-8" />
   <title>验证码列表</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style>
-      :root {
-        --bg: #f8fafc;
-        --card-odd: #ffffff;
-        --card-even: #f1f5f9;
-        --text: #1e293b;
-        --sub: #64748b;
-        --primary: #3b82f6;
-        --primary-hover: #2563eb;
-        --success: #10b981;
-        --danger: #ef4444;
-        --gold: linear-gradient(135deg, #fef9c3, #fde68a);
-        --gold-border: #facc15;
-        --gold-text: #b45309;
-        --shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-        --border-radius: 16px;
-        --transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-
-      * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
-
-      body {
-        margin: 0;
-        padding: 20px 12px 100px;
-        background: var(--bg);
-        color: var(--text);
-        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-        line-height: 1.6;
-      }
-
-      .wrap {
-        max-width: 900px;
-        margin: 0 auto;
-      }
-
-      h1 {
-        margin: 0 0 18px;
-        font-size: 32px;
-        font-weight: 800;
-        color: var(--primary);
-        position: relative;
-        display: inline-block;
-        padding-bottom: 8px;
-      }
-
-      h1:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 60px;
-        height: 4px;
-        background: var(--primary);
-        border-radius: 2px;
-      }
-
-      .topbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 28px;
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 18px 24px;
-        background: white;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-      }
-
-      .btn {
-        background: var(--primary);
-        color: #fff;
-        padding: 10px 22px;
-        border-radius: 12px;
-        font-size: 15px;
-        font-weight: 600;
-        text-decoration: none;
-        cursor: pointer;
-        border: none;
-        transition: var(--transition);
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-        flex-shrink: 0;
-      }
-
-      .btn:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35);
-      }
-
-      .btn.secondary {
-        background: #64748b;
-        box-shadow: 0 4px 10px rgba(100, 116, 139, 0.2);
-      }
-
-      .btn.secondary:hover {
-        background: #475569;
-      }
-
-      .item {
-        border-radius: var(--border-radius);
-        padding: 22px 25px;
-        box-shadow: var(--shadow);
-        margin-bottom: 18px;
-        transition: var(--transition);
-        animation: fadeIn 0.4s ease;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid rgba(0, 0, 0, 0.03);
-      }
-
-      .item::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: var(--primary);
-      }
-
-      .item:nth-child(odd) {
-        background: var(--card-odd);
-      }
-
-      .item:nth-child(even) {
-        background: var(--card-even);
-      }
-
-      .item:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      }
-
-      /* 金色高亮的第一条记录 */
-      .item:first-child {
-        background: var(--gold);
-        border: 2px solid var(--gold-border);
-        position: relative;
-      }
-
-      .latest-tip {
-        position: absolute;
-        top: 0;
-        right: 0;
-        background: var(--gold-text);
-        color: white;
-        padding: 6px 14px;
-        border-radius: 0 0 0 16px;
-        font-size: 14px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      }
-
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(15px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-
-      .line {
-        font-size: 24px;
-        font-weight: 700;
-        word-break: break-all;
-        display: flex;
-        gap: 15px;
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .recipient {
-        font-weight: 600;
-        color: var(--primary);
-        background: rgba(59, 130, 246, 0.1);
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-size: 16px;
-      }
-
-      .code {
-        font-size: 28px;
-        letter-spacing: 2px;
-        color: var(--primary);
-        font-weight: 800;
-        padding: 0 5px;
-      }
-
-      .code-notfound {
-        color: var(--danger);
-        font-weight: 600;
-        font-size: 22px;
-      }
-
-      .meta {
-        margin-top: 10px;
-        color: var(--sub);
-        font-size: 14px;
-        line-height: 1.5;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 8px;
-      }
-
-      .meta i {
-        width: 16px;
-        text-align: center;
-      }
-
-      details {
-        margin-top: 15px;
-      }
-
-      details summary {
-        cursor: pointer;
-        color: var(--primary);
-        font-size: 15px;
-        font-weight: 600;
-        user-select: none;
-        outline: none;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: var(--transition);
-        padding: 8px 0;
-      }
-
-      details summary:hover {
-        color: var(--primary-hover);
-      }
-
-      details[open] summary {
-        margin-bottom: 12px;
-      }
-
-      pre {
-        white-space: pre-wrap;
-        word-break: break-word;
-        background: rgba(243, 244, 246, 0.7);
-        padding: 16px;
-        border-radius: 12px;
-        font-size: 13px;
-        max-height: 320px;
-        overflow: auto;
-        font-family: 'SF Mono', 'Roboto Mono', monospace;
-        line-height: 1.5;
-        border: 1px solid rgba(0, 0, 0, 0.05);
-      }
-
-      .raw-meta {
-        font-size: 14px;
-        color: var(--sub);
-        line-height: 1.6;
-        margin: 10px 0 15px;
-        padding: 12px 15px;
-        background: rgba(243, 244, 246, 0.5);
-        border-radius: 10px;
-        border-left: 3px solid var(--primary);
-      }
-
-      .empty {
-        color: var(--sub);
-        text-align: center;
-        margin: 60px 0;
-        font-size: 16px;
-        padding: 40px;
-        background: var(--card-odd);
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-      }
-
-      .empty i {
-        font-size: 48px;
-        margin-bottom: 20px;
-        color: #cbd5e1;
-      }
-
-      .copy-btn {
-        font-size: 16px;
-        padding: 10px 24px;
-        border-radius: 10px;
-        border: none;
-        cursor: pointer;
-        background: var(--primary);
-        color: #fff;
-        transition: var(--transition);
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-weight: 600;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-      }
-
-      .copy-btn:hover {
-        background: var(--primary-hover);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 15px rgba(59, 130, 246, 0.4);
-      }
-
-      .copy-btn.done {
-        background: var(--success) !important;
-        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-      }
-
-      #stopNotice {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        background: #1e293b;
-        color: #fff;
-        padding: 12px 20px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
-        z-index: 100;
-        transform: translateY(20px);
-        opacity: 0;
-        transition: var(--transition);
-      }
-
-      #stopNotice.show {
-        transform: translateY(0);
-        opacity: 1;
-      }
-
-      .more-wrap {
-        text-align: center;
-        margin: 40px 0 20px;
-      }
-
-      .header-info {
-        font-size: 15px;
-        color: var(--sub);
-        margin-top: 5px;
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 10px;
-      }
-
-      .counter {
-        background: var(--primary);
-        color: white;
-        padding: 2px 10px;
-        border-radius: 12px;
-        font-size: 13px;
-        font-weight: 600;
-      }
-
-      .refresh-info {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        background: rgba(59, 130, 246, 0.1);
-        padding: 3px 10px;
-        border-radius: 12px;
-        color: var(--primary);
-      }
-
-      .highlight {
-        animation: highlight 1.5s ease;
-      }
-
-      @keyframes highlight {
-        0% { background-color: rgba(16, 185, 129, 0.3); }
-        100% { background-color: transparent; }
-      }
-
-      /* 移动端优化 */
-      @media (max-width: 768px) {
-        body {
-          padding: 15px 10px 80px;
-        }
-
-        h1 {
-          font-size: 26px;
-          margin-bottom: 15px;
-        }
-
-        h1:after {
-          width: 45px;
-        }
-
-        .topbar {
-          flex-direction: column;
-          align-items: stretch;
-          padding: 15px;
-          gap: 12px;
-        }
-
-        .header-info {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 8px;
-        }
-
-        .line {
-          font-size: 20px;
-          gap: 10px;
-          flex-direction: column;
-          align-items: flex-start;
-        }
-
-        .code {
-          font-size: 24px;
-          padding: 0;
-          word-break: break-all;
-          width: 100%;
-        }
-
-        .recipient {
-          font-size: 14px;
-          padding: 3px 10px;
-        }
-
-        .meta {
-          font-size: 13px;
-          gap: 6px;
-        }
-
-        .item {
-          padding: 18px 20px;
-        }
-
-        .latest-tip {
-          font-size: 12px;
-          padding: 4px 10px;
-        }
-
-        .btn, .copy-btn {
-          width: 100%;
-          justify-content: center;
-          padding: 12px;
-          font-size: 16px;
-        }
-
-        details summary {
-          font-size: 14px;
-        }
-
-        pre {
-          font-size: 12px;
-          padding: 12px;
-        }
-
-        .empty {
-          margin: 40px 0;
-          padding: 30px 20px;
-        }
-
-        .empty i {
-          font-size: 40px;
-        }
-
-        .empty h2 {
-          font-size: 18px;
-        }
-      }
-
-      @media (max-width: 480px) {
-        h1 {
-          font-size: 24px;
-        }
-
-        .line {
-          font-size: 18px;
-        }
-
-        .code {
-          font-size: 22px;
-        }
-
-        .meta {
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 5px;
-        }
-
-        .item {
-          padding: 15px;
-        }
-
-        .raw-meta {
-          font-size: 13px;
-          padding: 10px;
-        }
-      }
-
-      /* 空状态增强 */
-      .empty-content {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .empty-content i {
-        font-size: 64px;
-        color: #e2e8f0;
-        margin-bottom: 15px;
-      }
-
-      .empty-content h2 {
-        font-size: 20px;
-        margin-bottom: 10px;
-        color: #475569;
-      }
-
-      .empty-content p {
-        max-width: 400px;
-        margin-bottom: 20px;
-        line-height: 1.5;
-      }
-
-      /* 加载动画 */
-      .loader {
-        display: flex;
-        justify-content: center;
-        padding: 30px 0;
-      }
-
-      .loader-dot {
-        width: 12px;
-        height: 12px;
-        background-color: var(--primary);
-        border-radius: 50%;
-        margin: 0 5px;
-        animation: loader 1.4s infinite ease-in-out both;
-      }
-
-      .loader-dot:nth-child(1) {
-        animation-delay: -0.32s;
-      }
-
-      .loader-dot:nth-child(2) {
-        animation-delay: -0.16s;
-      }
-
-      @keyframes loader {
-        0%, 80%, 100% { transform: scale(0); }
-        40% { transform: scale(1.0); }
-      }
-
-      /* 底部操作栏 */
-      .bottom-actions {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: white;
-        padding: 15px;
-        box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
-        display: flex;
-        gap: 10px;
-        z-index: 10;
-      }
-
-      .bottom-actions .btn {
-        flex: 1;
-        text-align: center;
-      }
-    </style>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;800&display=swap">
+  <style>
+    body {
+      background: #f8fafc;
+      color: #1e293b;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      padding: 16px 24px;
+      margin-bottom: 24px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+    .copy-btn, #toggleRefresh {
+      background: #3b82f6;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 18px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .copy-btn:hover, #toggleRefresh:hover {
+      background: #2563eb;
+    }
+    #stopNotice {
+      color: red;
+      font-size: 14px;
+      display: none;
+    }
+    #stopNotice.show {
+      display: inline-block;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+    }
+    .item {
+      background: white;
+      border-left: 6px solid #3b82f6;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .item.highlight {
+      background: #fef9c3;
+      border-color: #facc15;
+    }
+    .latest-tip {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background: #b45309;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-bottom-left-radius: 12px;
+    }
+    .line {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    .code {
+      color: #3b82f6;
+      font-weight: 800;
+      font-size: 22px;
+    }
+    .meta {
+      font-size: 13px;
+      color: gray;
+      margin: 10px 0;
+    }
+    details summary {
+      cursor: pointer;
+      color: #3b82f6;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+    pre {
+      background: #f1f5f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      overflow: auto;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    验证码列表
-    <button id="toggleRefresh" class="copy-btn">停止自动刷新</button>
-    <span id="stopNotice">⏸ 已暂停</span>
-  </header>
-
-  <div class="container" id="list">
-    <div class="empty">正在加载中...</div>
+  <div class="container">
+    <div class="header">
+      <h1>验证码列表</h1>
+      <div>
+        <button id="toggleRefresh" class="copy-btn">停止自动刷新</button>
+        <span id="stopNotice">⏸ 已暂停</span>
+      </div>
+    </div>
+    <div id="list"><div class="empty">正在加载中...</div></div>
   </div>
 
   <script>
@@ -612,31 +141,24 @@
           <div class="item ${index === 0 ? 'highlight' : ''}">
             ${index === 0 ? `<div class="latest-tip">🟡 最新</div>` : ""}
             <div class="line">
-              <span>${item["收件人"] || "未知收件人"}　<br>验证码：
-                ${item["验证码"] && item["验证码"] !== "-" 
-                  ? `<span class="code">${item["验证码"]}</span>` 
-                  : `<span class="code-notfound">(未找到)</span>`}
-              </span>
-              ${item["验证码"] && item["验证码"] !== "-" 
-                ? `<button class="copy-btn" data-code="${item["验证码"]}">复制</button>` 
-                : ""}
+              ${item["收件人"] || "未知收件人"} <br> 验证码：
+              ${item["验证码"] && item["验证码"] !== "-"
+                ? `<span class="code">${item["验证码"]}</span>
+                   <button class="copy-btn" data-code="${item["验证码"]}">复制</button>`
+                : `<span class="code">(未找到)</span>`}
             </div>
             <div class="meta">${formatDate(item["接收时间"])}</div>
-
             <details>
               <summary>查看原文</summary>
-              <div class="raw-meta">
+              <div>
                 ${item["邮件主题"] ? `件名：${item["邮件主题"]}<br>` : ""}
                 ${item["发件人"] ? `发件人：${item["发件人"]}<br>` : ""}
-                ${item["收件人"] ? `收件人：${item["收件人"]}` : ""}
+                <pre>${item["正文摘要"] || ""}</pre>
               </div>
-              <pre>${item["正文摘要"] || ""}</pre>
             </details>
-          </div>
-        `;
+          </div>`;
         listEl.insertAdjacentHTML('beforeend', html);
       });
-
       setupCopyButtons();
     }
 
@@ -659,7 +181,6 @@
       });
     }
 
-    // 自动刷新控制
     let autoRefresh = true;
     let timer = setInterval(loadData, 10000);
 
